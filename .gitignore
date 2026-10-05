@@ -1,0 +1,240 @@
+# Node.js
+node_modules/
+.git+
+dist/
+build/
+.nyc_output
+coverage/
+*.log
+tmp/
+
+temp/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.example
+
+# Next.js
+.next
+*.log
+*.map
+
+# TypeScript
+*.tsbuildinfo
+tsb.json
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Package manager
+.yarn-integrity
+.yarn-cache
+
+# Testing
+.playwright-report
+.jest-cache
+
+# Static site generators
+public/static
+
+# Logs
+logs/
+*.log
+
+# Dependencies (kept for reference but not committed)
+
+# Temporary files
+*.tmp
+*.temp
+
+# Distribution folders
+*.bundle.*
+*.dist.*
+
+# VS Code extensions
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Maven/Gradle
+target/
+
+# Ruby
+*.gem
+vendor/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Go
+go.mod
+go.sum
+
+# C/C++
+*.o
+*.a
+*.so
+
+# Dart
+packages/
+
+# System files
+**/Thumbs.db
+**/desktop.ini
+
+# Editor backups
+*~
+
+# OS X
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Distribution packages
+*.zip
+*.tar.gz
+*.rpm
+*.deb
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# dotenv environment variables file
+.env*.local
+
+# Ignore all log files
+*.log
+*.log.*
+
+# Ignore coverage and distribution directories
+*/coverage/
+*/dist/
+*/.next/
+
+# Ignore build directories for each package
+*/packages/*/dist/
+
+# Ignore temporary files and swap files
+*~[0-9]*
+*.bak
+*.swp
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore node_modules
+node_modules/
+
+# Ignore dependency directories
+**/node_modules/
+
+# Ignore all .env* files
+.env*
+
+# Ignore temporary and backup files
+*.tmp
+*.backup
+
+# Ignore generated files
+*.generated
+
+# Ignore distribution directories
+*.dist
+*.out
+
+# Ignore cache directories
+*.cache
+*.manifest
+
+# Ignore coverage directories
+.coverage
+.coverage.*
+htmlcov/
+
+# Ignore virtual environments
+.venv
+. virtualenv
+
+# Ignore IDE directories
+.idea/
+.vscode/
+
+# Ignore OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore distribution directories
+*.dist
+*.out
+
+# Ignore build directories
+build/
+dist/
+
+# Ignore package lock files
+*.lock
+*.lock.json
+
+# Ignore compiled JavaScript files
+*.js
+*.js.map
+*.min.js
+
+# Ignore TypeScript compile output
+*.js.map
+*.d.ts
+
+# Ignore node_modules
+node_modules/
+
+# Ignore .git directory
+git/
+
+# Ignore .next directory
+.next/
+
+# Ignore coverage directories
+coverage/
+
+# Ignore coverage reports
+coverage.*
+htmlcov/
+
+# Ignore .nyc_output
+yarn.lock

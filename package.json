@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "next lint",
+    "lint:check": "next lint --quiet",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -15,29 +18,33 @@
     "test:watch": "bun test --watch"
   },
   "dependencies": {
+    "@upstash/ratelimit": "^2.0.6",
+    "cheerio": "^1.1.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "drizzle-orm": "^1.0.0-rc.2",
+    "lucide-react": "^0.539.0",
     "next": "15.5.26",
+    "postgres": "^3.4.7",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "@upstash/ratelimit": "^2.0.6",
-    "cloudflare-turnstile": "^1.1.6",
-    "drizzle-orm": "^1.0.0-rc.2",
-    "postgres": "^3.4.7",
-    "cheerio": "^1.1.1",
-    "zod": "^4.0.0",
-    "clsx": "^2.1.1",
     "tailwind-merge": "^3.3.1",
-    "lucide-react": "^0.539.0",
-    "date-fns": "^4.1.0"
+    "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@types/bun": "^1.2.0",
     "@types/node": "^22.17.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
-    "typescript": "^5.8.0",
-    "tailwindcss": "^4.1.0",
-    "drizzle-kit": "^1.0.0-rc.2",
+    "@typescript-eslint/eslint-plugin": "^8.71.0",
+    "@typescript-eslint/parser": "^8.71.0",
     "bun": "^1.2.0",
-    "@types/bun": "^1.2.0"
+    "drizzle-kit": "^1.0.0-rc.2",
+    "eslint": "^10.12.0",
+    "eslint-config-next": "^15.5.26",
+    "prettier": "^3.4.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=26.0.0"
