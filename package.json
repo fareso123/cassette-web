@@ -1,0 +1,45 @@
+{
+  "name": "cassette-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
+  },
+  "dependencies": {
+    "next": "15.5.26",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "@upstash/ratelimit": "^2.0.6",
+    "cloudflare-turnstile": "^1.1.6",
+    "drizzle-orm": "^1.0.0-rc.2",
+    "postgres": "^3.4.7",
+    "cheerio": "^1.1.1",
+    "zod": "^4.0.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1",
+    "lucide-react": "^0.539.0",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.17.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.8.0",
+    "tailwindcss": "^4.1.0",
+    "drizzle-kit": "^1.0.0-rc.2",
+    "bun": "^1.2.0",
+    "@types/bun": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=26.0.0"
+  }
+}
