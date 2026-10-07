@@ -1,10 +1,12 @@
 import type {
   ScraperModule,
-  ScrapedResult,
   ScraperConfig,
   ScraperRegistry,
 } from '../../types/scraped';
 import { BaseScraper } from './base';
+import { TorrentSitesScraper } from './torrent-sites';
+import { MusicSitesScraper } from './music-sites';
+import { SoundCloudScraper } from './soundcloud';
 import { scrapers as scrapersTable } from '../../lib/db/schema';
 import { db } from '../../lib/db';
 import { eq } from 'drizzle-orm';
@@ -62,18 +64,12 @@ class ScraperRegistryImpl implements ScraperRegistry {
 
   private createScraperFromConfig(config: ScraperConfig): ScraperModule | null {
     switch (config.name) {
-      case 'torrent-sites': {
-        const { TorrentSitesScraper } = require('./torrent-sites');
+      case 'torrent-sites':
         return new TorrentSitesScraper(config);
-      }
-      case 'music-sites': {
-        const { MusicSitesScraper } = require('./music-sites');
+      case 'music-sites':
         return new MusicSitesScraper(config);
-      }
-      case 'soundcloud': {
-        const { SoundCloudScraper } = require('./soundcloud');
+      case 'soundcloud':
         return new SoundCloudScraper(config);
-      }
       default:
         return null;
     }

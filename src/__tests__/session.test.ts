@@ -1,6 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-
-const { createSessionToken, trackRateLimit } = require('@/lib/session');
+import { createSessionToken, trackRateLimit } from '@/lib/session';
 
 describe('Session management', () => {
   test('should create session token', () => {
