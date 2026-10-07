@@ -34,11 +34,16 @@ src/
 │   ├── rate-limit.ts        # Upstash; no-ops when Upstash env is absent
 │   ├── security-middleware.ts
 │   ├── session.ts           # HMAC tokens, per-session rate limit
+│   ├── search-history.ts    # search_history reads/writes
 │   ├── turnstile.ts         # Not called by any route yet
 │   └── utils/youtube.ts     # YouTube URL parsing
 ├── types/                   # extracted.ts, scraped.ts, search.ts
 ├── middleware.ts            # Edge middleware: security headers only
 └── __tests__/               # bun:test
+
+drizzle.config.ts           # Drizzle Kit config
+drizzle/                    # Generated migrations
+scripts/seed.ts              # Inserts the default scrapers
 ```
 
 Design reference: `design2.md` documents the brutalist/mono design system.
@@ -47,11 +52,14 @@ The themes in `globals.css` implement it.
 ## Data Flow
 
 1. `page.tsx` POSTs `{ query, type }` to `/api/search`
-2. Route rate-limits by IP, then dispatches on `type`:
+2. Route reads the session if one is present, then rate-limits by user id
+   (500/min) or IP (100/min), then dispatches on `type`:
    - `url` → `parseYouTubeUrl` validation → `extract()` from yt-dlp
    - `song` → `scraperRegistry.getEnabled()` → parallel `search()` per
      scraper → dedupe by `downloadUrl`
-3. Response is a `SearchResponse`; the client splits it on the presence of
+3. Signed-in searches are appended to `search_history`; anonymous ones are
+   not persisted
+4. Response is a `SearchResponse`; the client splits it on the presence of
    `directAudioUrl` and renders tabs
 
 Scrapers are **database-driven**. `registry.ts` reads the `scrapers` table
@@ -75,13 +83,18 @@ npm run format       # prettier --write .
 npm run format:check
 ```
 
-Database (requires a `drizzle.config.ts`, which this repo does not have yet):
+Database:
 
 ```bash
-npm run db:push
-npm run db:generate
-npm run db:studio
+npm run db:push      # apply schema directly (dev)
+npm run db:generate  # write a migration from schema changes
+npm run db:migrate   # apply migrations
+npm run db:seed      # insert the default scrapers
+npm run db:studio    # browse data
 ```
+
+First-time setup: `db:push` (or `db:migrate`) then `db:seed`. Without the
+seed, song search returns nothing.
 
 ## Tooling
 
@@ -153,21 +166,25 @@ overwrites it on re-render.
 
 Things that look implemented but are not. Verify before relying on them:
 
-- **No authentication.** `session.ts` has real token verification, but
-  `/api/search` never calls `validateSession`. The route is rate-limited
-  by IP only.
+- **No signup or login.** The session layer verifies tokens and the search
+  route reads them, but nothing issues a cookie yet, so in practice every
+  caller is anonymous. A valid token raises the rate limit and records
+  history; absent that, the user-facing search history in the dashboard is
+  still `localStorage`.
 - **Turnstile is not called.** `verifyToken` exists; no route invokes it.
-- **No `drizzle.config.ts`.** Every `db:*` script fails as-is.
-- **No migrations or seed data.** The `scrapers` table must be seeded by
-  hand before song search returns anything.
 - **`middleware.ts` does not rate-limit.** Edge runtime cannot use
   `@upstash/redis`; the route does it instead.
-- **`search_history` and `users` tables are unused.** Recent searches live
-  in `localStorage`.
-- **21 lint warnings remain**, mostly unused imports and `any` in `lib/`.
-- **The session rate-limit test logs a Drizzle error.** There is no database
-  in the test env, so the query fails and `trackRateLimit` fails open. That is
-  the tested behaviour, not a failure, but the output looks alarming.
+- **Scraper selectors are unverified.** The seed's CSS selectors were
+  written from the sites' expected markup and have not been checked
+  against the live pages. Expect to correct them.
+- **The `users` table is unused.** Nothing signs anyone in, so there are
+  no rows and `search_history.user_id` references rows that cannot exist.
+- **`getRecentSearches` and `clearSearchHistory` are unused.** Written
+  alongside `recordSearch`; no endpoint exposes them yet.
+- **The session rate-limit test logs a Drizzle error.** There is no
+  database in the test env, so the query fails and `trackRateLimit` fails
+  open. That is the tested behaviour, not a failure, but it looks alarming.
+- **ESLint runs clean** (0 errors, 0 warnings) as of this writing.
 
 ## Where to Start
 
