@@ -11,6 +11,8 @@
  * Usage: npm run db:seed   (runs with bun, which loads .env automatically)
  */
 
+/* eslint-disable no-console -- a CLI script reports its progress to stdout */
+
 import postgres from 'postgres';
 import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
