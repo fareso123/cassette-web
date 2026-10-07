@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { securityMiddleware } from './lib/security-middleware';
 import { checkRateLimit } from './lib/rate-limit';
 
@@ -9,8 +8,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   
   // Apply rate limiting to API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    const rateLimitResult = checkRateLimit(request);
-    if (!rateLimitResult.allowed) {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = await checkRateLimit(`search:${ip}`);
+    if (!rateLimitResult.success) {
       return new NextResponse('Too Many Requests', { status: 429 });
     }
   }

@@ -11,4 +11,4 @@ try {
   process.exit(1);
 }
 
-export const db = drizzle(client);
+export const db = drizzle({ client });

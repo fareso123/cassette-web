@@ -1,15 +1,21 @@
 import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 import { env } from './env';
 
 let ratelimit: Ratelimit | null = null;
 
 function getRatelimit(): Ratelimit | null {
   if (ratelimit) return ratelimit;
-  if (!env.UPSTASH_REDIS_URL) return null;
+  if (!env.UPSTASH_REDIS_URL || !env.UPSTASH_REDIS_TOKEN) return null;
+  const redis = new Redis({
+    url: env.UPSTASH_REDIS_URL,
+    token: env.UPSTASH_REDIS_TOKEN,
+  });
   ratelimit = new Ratelimit({
     limiter: Ratelimit.slidingWindow(100, '60 s'),
     analytics: true,
     prefix: 'cassette-web',
+    redis,
   });
   return ratelimit;
 }

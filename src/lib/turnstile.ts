@@ -60,7 +60,7 @@ export async function verifyToken(
       };
     }
 
-    const data = await verifyResponse.json<TurnstileVerifyResponse>();
+    const data = (await verifyResponse.json()) as TurnstileVerifyResponse;
     return data;
   } catch (error) {
     return {
