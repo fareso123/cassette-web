@@ -14,10 +14,13 @@ describe('Session management', () => {
   });
 
   test('should track rate limit per session', async () => {
+    // No database in the test environment, so this exercises the
+    // fail-open path: a DB error must allow the request rather than
+    // lock the user out.
     const result = await trackRateLimit(1, 'search-api', 10, 60000);
-    expect(result.allowed).toBeDefined();
+    expect(result.allowed).toBe(true);
     expect(result.remaining).toBeDefined();
-    expect(result.reset).toBeDefined();
+    expect(result.reset).toBeGreaterThan(Date.now());
   });
 });
 
