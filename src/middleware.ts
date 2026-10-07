@@ -1,21 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { securityMiddleware } from './lib/security-middleware';
-import { checkRateLimit } from './lib/rate-limit';
 
+// This middleware runs on the Edge runtime. Do not import lib/rate-limit
+// here: it pulls in @upstash/redis, whose Node build reads process.version
+// and is unsupported on Edge. The search route rate-limits independently,
+// so an unthrottled pass through here is not a hole — it is one less
+// dependency to break the edge bundle.
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-  // Apply security headers to all requests
-  const response = securityMiddleware(request);
-  
-  // Apply rate limiting to API routes
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
-    const rateLimitResult = await checkRateLimit(`search:${ip}`);
-    if (!rateLimitResult.success) {
-      return new NextResponse('Too Many Requests', { status: 429 });
-    }
-  }
-  
-  return response;
+  return securityMiddleware(request);
 }
 
 export const config = {
