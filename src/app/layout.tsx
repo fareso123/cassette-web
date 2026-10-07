@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Russo_One, Space_Mono, Inter } from 'next/font/google';
-import { ThemeController } from '@/components/ThemeController';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import './globals.css';
@@ -26,12 +25,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'COUNDEX · MUSIC PLAYER',
+  title: 'COUNDEX · Music Player',
   description: 'Search songs and find links across YouTube, torrents, and more.',
   icons: {
     icon: [
       {
-        url: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ED591A%22 stroke-width=%221.5%22><rect x=%222%22 y=%224%22 width=%2220%22 height=%2216%22/%3E<circle cx=%228%22 cy=%2212%22 r=%222%22/%3E<circle cx=%2216%22 cy=%2212%22 r=%222%22/%3E<line x1=%222%22 y1=%228%22 x2=%2222%22 y2=%228%22/%3E<line x1=%222%22 y1=%2216%22 x2=%2222%22 y2=%2216%22/%3E</svg>',
+        url: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ED591A%22 stroke-width=%221.5%22><rect x=%222%22 y=%224%22 width=%2220%22 height=%2216%22/><circle cx=%228%22 cy=%2212%22 r=%222%22/><circle cx=%2216%22 cy=%2212%22 r=%222%22/><line x1=%222%22 y1=%228%22 x2=%2222%22 y2=%228%22/><line x1=%222%22 y1=%2216%22 x2=%2222%22 y2=%2216%22/></svg>',
         type: 'image/svg+xml',
       },
     ],
@@ -47,10 +46,18 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${russoOne.variable} ${spaceMono.variable} ${inter.variable}`}
+      // No data-theme here: ThemeController sets it after mount, so the
+      // server render stays deterministic.
       suppressHydrationWarning
-      data-theme="cassette"
     >
-      <body className="min-h-screen font-sans transition-colors duration-300 paper-grain" style={{ colorScheme: 'light' }}>
+      <body className="min-h-screen font-sans transition-colors duration-300 paper-grain">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-base-100 focus:text-base-content focus:px-4 focus:py-2 focus:border focus:border-base-content/30"
+        >
+          Skip to content
+        </a>
+
         {/* Giant background decorative text */}
         <div
           aria-hidden="true"
@@ -58,16 +65,19 @@ export default function RootLayout({
           style={{ opacity: '0.04' }}
         >
           <span
-            className="font-display text-[30vw] leading-none tracking-tight"
-            style={{ fontFamily: 'var(--font-display)' }}
+            className="leading-none tracking-tight"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '30vw',
+            }}
           >
-            CX
+            <span translate="no">CX</span>
           </span>
         </div>
 
         <div className="relative z-10 flex flex-col min-h-screen">
           <Navbar />
-          <main className="flex-1">
+          <main id="main" tabIndex={-1}>
             {children}
           </main>
           <Footer />
