@@ -1,5 +1,5 @@
 import { BaseScraper } from './base';
-import type { ScraperConfig } from '../../types/scraped';
+import type { ScraperConfig, ScrapedResult } from '../../types/scraped';
 
 export class SoundCloudScraper extends BaseScraper {
   constructor(config: ScraperConfig) {
@@ -12,7 +12,7 @@ export class SoundCloudScraper extends BaseScraper {
     );
   }
 
-  async search(query: string): Promise<any[]> {
+  async search(query: string): Promise<ScrapedResult[]> {
     try {
       const searchUrl = `${this.baseUrl}/search?q=${encodeURIComponent(query)}`;
       const html = await this.fetch(searchUrl);

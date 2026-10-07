@@ -105,7 +105,7 @@ export class BaseScraper implements ScraperModule {
     return new URL(url, this.baseUrl).href;
   }
 
-  async search(query: string): Promise<ScrapedResult[]> {
+  async search(_query: string): Promise<ScrapedResult[]> {
     throw new Error('search() must be implemented by subclass');
   }
 }

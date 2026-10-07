@@ -29,6 +29,15 @@ export function ResultCard({
       {/* Thumbnail strip */}
       {thumbnail && (
         <div className="relative h-32 shrink-0 overflow-hidden border-b border-base-content/20">
+          {/*
+            Deliberately a plain <img>, not next/image. Thumbnails come from
+            whatever host the yt-dlp extractor or scraper returns, so
+            next/image would need an open-ended remotePatterns list, which
+            turns the image optimizer into a proxy that any third party can
+            make fetch arbitrary URLs. Fixed width/height and lazy loading
+            cover the CLS and bandwidth concerns the rule is really about.
+          */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={thumbnail}
             alt=""

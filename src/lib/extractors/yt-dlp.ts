@@ -1,11 +1,7 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { env } from '../env';
-import type {
-  ExtractedTrack,
-  ExtractedPlaylist,
-  ExtractedResult,
-} from '../../types/extracted';
+import type { ExtractedTrack, ExtractedPlaylist } from '../../types/extracted';
 
 const execFileAsync = promisify(execFile);
 
@@ -52,11 +48,12 @@ export async function extract(
     }
 
     return tracks;
-  } catch (error: any) {
+  } catch (error) {
+    const err = error as ExecFileError;
     if (
-      error.killed ||
-      error.code === 'ETIMEDOUT' ||
-      error.message?.includes('timed out')
+      err.killed ||
+      err.code === 'ETIMEDOUT' ||
+      err.message?.includes('timed out')
     ) {
       throw new Error(`yt-dlp timeout after ${timeout}ms for URL: ${url}`);
     }
@@ -64,34 +61,68 @@ export async function extract(
   }
 }
 
-function normalizeTrack(data: any): ExtractedTrack | null {
-  if (!data || !data.id) return null;
+/**
+ * Subset of yt-dlp's `--dump-json` output that we consume. Every field is
+ * optional because yt-dlp omits keys depending on the extractor, so this
+ * models absence rather than lying about it.
+ */
+interface YtDlpFormat {
+  acodec?: string | null;
+  vcodec?: string | null;
+  url?: string;
+  format_id?: string;
+  abitrate?: number | null;
+}
 
-  const formats = data.formats || [];
-  const audioFormats = formats.filter(
-    (f: any) => f.acodec && f.vcodec === 'none' && f.url
+interface YtDlpEntry {
+  id?: string;
+  title?: string | null;
+  uploader?: string | null;
+  artist?: string | null;
+  creator?: string | null;
+  duration?: number | null;
+  thumbnail?: string | null;
+  thumbnails?: { url?: string }[];
+  webpage_url?: string;
+  original_url?: string;
+  url?: string;
+  format_id?: string;
+  extractor?: string | null;
+  formats?: YtDlpFormat[];
+  _playlist_index?: number;
+  _playlist_title?: string;
+}
+
+/** execFile rejections carry the child's signal and exit code. */
+interface ExecFileError extends Error {
+  killed?: boolean;
+  code?: string | number;
+}
+
+function isAudioOnly(format: YtDlpFormat): boolean {
+  return Boolean(format.acodec) && format.vcodec === 'none' && Boolean(format.url);
+}
+
+function normalizeTrack(data: YtDlpEntry): ExtractedTrack | null {
+  if (!data?.id) return null;
+
+  const audioFormats = (data.formats ?? []).filter(isAudioOnly);
+  const bestAudio = audioFormats.reduce<YtDlpFormat | null>(
+    (best, current) =>
+      (current.abitrate ?? 0) > (best?.abitrate ?? 0) ? current : best,
+    null
   );
-  const bestAudio =
-    audioFormats.length > 0
-      ? audioFormats.reduce((best: any, current: any) => {
-          const bestBitrate = best?.abitrate || 0;
-          const currentBitrate = current?.abitrate || 0;
-          return currentBitrate > bestBitrate ? current : best;
-        }, audioFormats[0])
-      : null;
 
   const thumbnail =
     data.thumbnail ||
-    (data.thumbnails?.length > 0 ? data.thumbnails[0].url : '') ||
+    data.thumbnails?.find((t) => t.url)?.url ||
     '';
-  const artist =
-    data.uploader || data.artist || data.creator || 'Unknown Artist';
 
   return {
     title: data.title || 'Unknown Title',
-    artist: artist,
+    artist: data.uploader || data.artist || data.creator || 'Unknown Artist',
     duration: data.duration || 0,
-    thumbnail: thumbnail,
+    thumbnail,
     webpageUrl: data.webpage_url || data.original_url || '',
     directAudioUrl: bestAudio?.url || data.url || '',
     formatId: bestAudio?.format_id || data.format_id || '',

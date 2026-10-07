@@ -2,13 +2,8 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { env } from '../env';
 
-let client: ReturnType<typeof postgres>;
-try {
-  client = postgres(env.DATABASE_URL);
-  console.log('Connected to database');
-} catch (error) {
-  console.error('Failed to connect to database:', error);
-  process.exit(1);
-}
+// postgres() connects lazily, so construction rarely throws. A real
+// connection failure surfaces on the first query rather than here.
+const client = postgres(env.DATABASE_URL);
 
 export const db = drizzle({ client });

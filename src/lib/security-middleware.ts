@@ -10,7 +10,7 @@ export interface SecurityHeaders {
   'Permissions-Policy': string;
 }
 
-export const securityMiddleware = (request: NextRequest): NextResponse => {
+export const securityMiddleware = (_request: NextRequest): NextResponse => {
   const response = NextResponse.next();
 
   const cspDirectives = [

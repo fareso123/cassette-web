@@ -1,4 +1,3 @@
-import type { ExtractedTrack } from '../../types/extracted';
 import { extractSongTitle, stripVideoIndicators } from '../extractors/yt-dlp';
 
 export interface YouTubeUrlInfo {

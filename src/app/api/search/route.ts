@@ -4,6 +4,7 @@ import { checkRateLimit } from '../../../lib/rate-limit';
 import { parseYouTubeUrl } from '../../../lib/utils/youtube';
 import { extract } from '../../../lib/extractors/yt-dlp';
 import { scraperRegistry } from '../../../lib/scrapers/registry';
+import type { ScrapedResult } from '../../../types/scraped';
 import type { SearchResponse } from '../../../types/search';
 
 export async function POST(request: NextRequest): Promise<Response> {
@@ -58,7 +59,8 @@ export async function POST(request: NextRequest): Promise<Response> {
 
       const allResults = settled
         .filter(
-          (r): r is PromiseFulfilledResult<any[]> => r.status === 'fulfilled'
+          (r): r is PromiseFulfilledResult<ScrapedResult[]> =>
+            r.status === 'fulfilled'
         )
         .flatMap(r => r.value);
 

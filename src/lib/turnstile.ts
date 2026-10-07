@@ -18,7 +18,6 @@ export async function verifyToken(
   options: TurnstileVerifyOptions = {}
 ): Promise<TurnstileVerifyResponse> {
   const secretKey = env.TURNSTILE_SECRET_KEY;
-  const siteKey = env.TURNSTILE_SITE_KEY;
 
   if (!secretKey) {
     return {
@@ -62,7 +61,9 @@ export async function verifyToken(
 
     const data = (await verifyResponse.json()) as TurnstileVerifyResponse;
     return data;
-  } catch (error) {
+  } catch {
+    // Never surface the underlying error: it can leak the secret key or
+    // the response body to the caller.
     return {
       success: false,
       error_codes: ['fetch-error'],

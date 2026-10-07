@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Music } from 'lucide-react';
 import { ThemeController } from './ThemeController';
 
 export function Navbar() {
