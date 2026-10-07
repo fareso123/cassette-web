@@ -19,77 +19,100 @@ export function SearchBar({
   onTypeChange,
   onSubmit,
 }: SearchBarProps) {
+  const isUrl = type === 'url';
+
   return (
-    <form onSubmit={onSubmit} style={{ fontFamily: 'var(--font-mono)' }}>
+    <form onSubmit={onSubmit} className="font-mono">
       {/* Mode toggle */}
-      <div className="flex gap-0 mb-4 border border-base-content/20">
+      <div
+        role="group"
+        aria-label="Search mode"
+        className="flex gap-0 mb-4 border border-base-content/20"
+      >
         <button
           type="button"
           onClick={() => onTypeChange('song')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-widest transition-colors ${
-            type === 'song'
+          aria-pressed={!isUrl}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-widest transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+            !isUrl
               ? 'bg-primary text-primary-content'
               : 'bg-base-100 text-base-content/60 hover:bg-base-200'
           }`}
-          style={{ fontFamily: 'var(--font-mono)' }}
         >
-          <Music className="w-3.5 h-3.5" />
+          <Music className="w-3.5 h-3.5" aria-hidden="true" />
           Song Name
         </button>
         <button
           type="button"
           onClick={() => onTypeChange('url')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-widest transition-colors border-l border-base-content/20 ${
-            type === 'url'
+          aria-pressed={isUrl}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-widest transition-colors border-l border-base-content/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+            isUrl
               ? 'bg-primary text-primary-content'
               : 'bg-base-100 text-base-content/60 hover:bg-base-200'
           }`}
-          style={{ fontFamily: 'var(--font-mono)' }}
         >
-          <Link2 className="w-3.5 h-3.5" />
+          <Link2 className="w-3.5 h-3.5" aria-hidden="true" />
           YouTube URL
         </button>
       </div>
 
       {/* Search input + submit */}
       <div className="flex gap-0">
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
+          <label htmlFor="search-query" className="sr-only">
+            {isUrl ? 'YouTube URL' : 'Song name'}
+          </label>
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40"
             aria-hidden="true"
           />
           <input
-            type="text"
+            id="search-query"
+            name="query"
+            type={isUrl ? 'url' : 'search'}
+            inputMode={isUrl ? 'url' : 'search'}
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder={type === 'url' ? 'https://youtube.com/...' : 'Enter song title...'}
-            className="w-full bg-base-100 border border-base-content/20 pl-10 pr-4 py-3 text-sm uppercase tracking-wider placeholder:text-base-content/30 focus:outline-none focus:border-primary"
-            style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}
+            placeholder={
+              isUrl ? 'https://youtube.com/watch?v=…' : 'Enter song title or artist…'
+            }
+            autoComplete="off"
+            spellCheck={false}
+            aria-describedby="search-hint"
+            className="w-full bg-base-100 border border-base-content/20 pl-10 pr-4 py-3 text-sm tracking-wide placeholder:text-base-content/30 focus:outline-none focus-visible:border-primary"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="btn btn-primary px-6 normal-case tracking-widest shrink-0"
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.75rem',
-            border: 'none',
-          }}
+          className="btn btn-primary px-6 tracking-widest shrink-0"
         >
           {loading ? (
             <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <Loader2
+                className="w-3.5 h-3.5 motion-safe:animate-spin"
+                aria-hidden="true"
+              />
               SEARCHING
             </>
           ) : (
             <>
-              <Search className="w-3.5 h-3.5" />
+              <Search className="w-3.5 h-3.5" aria-hidden="true" />
               SEARCH
             </>
           )}
         </button>
       </div>
+
+      <p
+        id="search-hint"
+        className="mt-2 text-[0.65rem] uppercase tracking-widest text-base-content/50"
+      >
+        {isUrl
+          ? 'Paste a YouTube video or playlist link'
+          : 'Search across YouTube, torrent sites, and MP3 sources'}
+      </p>
     </form>
   );
 }
