@@ -211,8 +211,11 @@ dist/
 *.lock
 *.lock.json
 
-# Ignore compiled JavaScript files
-*.js
+# Ignore compiled JavaScript output
+# NOTE: do not add a bare `*.js` rule here. Build config files
+# (eslint.config.js, postcss.config.js, *.config.js) are plain JavaScript
+# and must stay tracked. Ignore only build output:
+/dist/
 *.js.map
 *.min.js
 
