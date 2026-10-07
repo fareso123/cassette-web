@@ -4,16 +4,37 @@ import { checkRateLimit } from '../../../lib/rate-limit';
 import { parseYouTubeUrl } from '../../../lib/utils/youtube';
 import { extract } from '../../../lib/extractors/yt-dlp';
 import { scraperRegistry } from '../../../lib/scrapers/registry';
+import { validateSession } from '../../../lib/session';
+import { recordSearch } from '../../../lib/search-history';
 import type { ScrapedResult } from '../../../types/scraped';
 import type { SearchResponse } from '../../../types/search';
 
+/** Anonymous callers share a per-IP budget. */
+const ANON_WINDOW_MS = 60_000;
+const ANON_MAX = 100;
+
+/** A signed-in user gets their own, larger budget. */
+const USER_WINDOW_MS = 60_000;
+const USER_MAX = 500;
+
 export async function POST(request: NextRequest): Promise<Response> {
-  const ip = request.headers.get('x-forwarded-for') || 'unknown';
-  const rateLimitResult = await checkRateLimit(`search:${ip}`, 60000, 100);
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+
+  // Optional session: an absent or invalid token simply means anonymous.
+  // This endpoint is intentionally not gated on auth; see AGENTS.md.
+  const { valid, session } = await validateSession(request, ip);
+
+  const rateLimitResult = valid
+    ? await checkRateLimit(`user:${session?.userId}`, USER_WINDOW_MS, USER_MAX)
+    : await checkRateLimit(`anon:${ip}`, ANON_WINDOW_MS, ANON_MAX);
 
   if (!rateLimitResult.success) {
     return NextResponse.json(
-      { error: 'Rate limit exceeded', retryAfter: rateLimitResult.reset },
+      {
+        error: 'Rate limit exceeded',
+        retryAfter: rateLimitResult.reset,
+      },
       { status: 429 }
     );
   }
@@ -36,6 +57,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       queryType: type,
       resultCount: 0,
       timestamp: new Date().toISOString(),
+      authenticated: valid,
     };
 
     if (type === 'url') {
@@ -73,6 +95,12 @@ export async function POST(request: NextRequest): Promise<Response> {
 
       response.results = deduped;
       response.resultCount = deduped.length;
+    }
+
+    // Only a signed-in user's history is persisted. Anonymous searches stay
+    // out of the table so it cannot fill up with unassociated rows.
+    if (valid && session) {
+      await recordSearch(session.userId, query, type, response.resultCount);
     }
 
     return NextResponse.json(response);

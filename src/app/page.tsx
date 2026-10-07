@@ -48,6 +48,7 @@ export default function Home() {
     readRecent()
   );
   const [error, setError] = useState<string | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -69,6 +70,7 @@ export default function Home() {
 
       const data = await response.json();
       setResults(data.results || []);
+      setAuthenticated(Boolean(data.authenticated));
       saveToRecent(query.trim(), type);
     } catch (err) {
       console.error('Search error:', err);
@@ -111,6 +113,8 @@ export default function Home() {
           <span id="search-heading">Search module</span>
           <span className="text-base-content/30">·</span>
           <span>HF-S 800</span>
+          {/* Reflects whether the response carried a valid session */}
+          <span className="ml-auto">{authenticated ? 'Signed in' : 'Guest'}</span>
         </div>
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">

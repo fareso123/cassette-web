@@ -13,6 +13,8 @@ export interface SearchResponse {
   queryType: 'song' | 'url';
   resultCount: number;
   timestamp: string;
+  /** True when the request carried a valid session token. */
+  authenticated: boolean;
 }
 
 export type SearchResult = ExtractedTrack | ScrapedResult;
