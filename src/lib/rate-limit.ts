@@ -2,22 +2,48 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { env } from './env';
 
-let ratelimit: Ratelimit | null = null;
+let redis: Redis | null = null;
 
-function getRatelimit(): Ratelimit | null {
-  if (ratelimit) return ratelimit;
+/**
+ * Limiters are cached per budget. Upstash builds the sliding window when the
+ * Ratelimit is constructed, so a single shared instance cannot serve both
+ * the anonymous and the signed-in quota.
+ */
+const limiters = new Map<string, Ratelimit>();
+
+function budgetKey(windowMs: number, max: number): string {
+  return `${max}:${windowMs}`;
+}
+
+function getRedis(): Redis | null {
+  if (redis) return redis;
   if (!env.UPSTASH_REDIS_URL || !env.UPSTASH_REDIS_TOKEN) return null;
-  const redis = new Redis({
+  redis = new Redis({
     url: env.UPSTASH_REDIS_URL,
     token: env.UPSTASH_REDIS_TOKEN,
   });
-  ratelimit = new Ratelimit({
-    limiter: Ratelimit.slidingWindow(100, '60 s'),
+  return redis;
+}
+
+function getRatelimit(windowMs: number, max: number): Ratelimit | null {
+  const client = getRedis();
+  if (!client) return null;
+
+  const key = budgetKey(windowMs, max);
+  const cached = limiters.get(key);
+  if (cached) return cached;
+
+  const limiter = new Ratelimit({
+    limiter: Ratelimit.slidingWindow(max, `${windowMs} ms`),
     analytics: true,
-    prefix: 'cassette-web',
-    redis,
+    // Include the budget in the prefix so the two windows do not share
+    // counters, and bump it if the quota changes.
+    prefix: `cassette-web:${key}`,
+    redis: client,
   });
-  return ratelimit;
+
+  limiters.set(key, limiter);
+  return limiter;
 }
 
 export interface RateLimitResult {
@@ -27,28 +53,43 @@ export interface RateLimitResult {
   reset: number;
 }
 
+export function allowAll(windowMs: number, max: number): RateLimitResult {
+  return {
+    success: true,
+    limit: max,
+    remaining: max,
+    reset: Date.now() + windowMs,
+  };
+}
+
+/**
+ * Check a caller's budget.
+ *
+ * Fails open. If Upstash is unreachable the request is allowed through,
+ * because returning 500 on every search while Redis is down is worse than
+ * briefly losing the limit. The route-level budget is a guard against
+ * abuse, not an authorisation control.
+ */
 export async function checkRateLimit(
   identifier: string,
   windowMs: number = 60000,
   max: number = 100
 ): Promise<RateLimitResult> {
-  const rl = getRatelimit();
-  if (!rl) {
-    return {
-      success: true,
-      limit: max,
-      remaining: max,
-      reset: Date.now() + windowMs,
-    };
-  }
+  const rl = getRatelimit(windowMs, max);
+  if (!rl) return allowAll(windowMs, max);
 
-  const result = await rl.limit(identifier);
-  return {
-    success: result.success,
-    limit: result.limit,
-    remaining: result.remaining,
-    reset: result.reset,
-  };
+  try {
+    const result = await rl.limit(identifier);
+    return {
+      success: result.success,
+      limit: result.limit,
+      remaining: result.remaining,
+      reset: result.reset,
+    };
+  } catch (error) {
+    console.error('Rate limit check failed, allowing request:', error);
+    return allowAll(windowMs, max);
+  }
 }
 
 export function rateLimitMiddleware(
