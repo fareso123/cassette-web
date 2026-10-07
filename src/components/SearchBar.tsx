@@ -1,98 +1,95 @@
 'use client';
 
-import { useState } from 'react';
+import { Search, Music, Link2, Loader2 } from 'lucide-react';
 
-export function SearchBar() {
-  const [query, setQuery] = useState('');
-  const [type, setType] = useState<'song' | 'url'>('song');
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
+interface SearchBarProps {
+  query: string;
+  type: 'song' | 'url';
+  loading: boolean;
+  onQueryChange: (value: string) => void;
+  onTypeChange: (type: 'song' | 'url') => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!query.trim()) return;
-
-    setLoading(true);
-    try {
-      const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: query.trim(), type }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Search failed');
-      }
-
-      const data = await response.json();
-      setResults(data.results || []);
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
+export function SearchBar({
+  query,
+  type,
+  loading,
+  onQueryChange,
+  onTypeChange,
+  onSubmit,
+}: SearchBarProps) {
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setType('song')}
-            className={`px-4 py-2 rounded-l-md border ${type === 'song' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
-          >
-            Song Name
-          </button>
-          <button
-            type="button"
-            onClick={() => setType('url')}
-            className={`px-4 py-2 rounded-r-md border ${type === 'url' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
-          >
-            URL
-          </button>
-        </div>
-        <div className="flex gap-2">
+    <form onSubmit={onSubmit} style={{ fontFamily: 'var(--font-mono)' }}>
+      {/* Mode toggle */}
+      <div className="flex gap-0 mb-4 border border-base-content/20">
+        <button
+          type="button"
+          onClick={() => onTypeChange('song')}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-widest transition-colors ${
+            type === 'song'
+              ? 'bg-primary text-primary-content'
+              : 'bg-base-100 text-base-content/60 hover:bg-base-200'
+          }`}
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          <Music className="w-3.5 h-3.5" />
+          Song Name
+        </button>
+        <button
+          type="button"
+          onClick={() => onTypeChange('url')}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-widest transition-colors border-l border-base-content/20 ${
+            type === 'url'
+              ? 'bg-primary text-primary-content'
+              : 'bg-base-100 text-base-content/60 hover:bg-base-200'
+          }`}
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          <Link2 className="w-3.5 h-3.5" />
+          YouTube URL
+        </button>
+      </div>
+
+      {/* Search input + submit */}
+      <div className="flex gap-0">
+        <div className="relative flex-1">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40"
+            aria-hidden="true"
+          />
           <input
             type="text"
             value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder={
-              type === 'url' ? 'Paste YouTube URL...' : 'Search for songs...'
-            }
-            className="flex-1 px-4 py-2 border rounded-md"
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder={type === 'url' ? 'https://youtube.com/...' : 'Enter song title...'}
+            className="w-full bg-base-100 border border-base-content/20 pl-10 pr-4 py-3 text-sm uppercase tracking-wider placeholder:text-base-content/30 focus:outline-none focus:border-primary"
+            style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}
           />
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
         </div>
-      </form>
-
-      {results.length > 0 && (
-        <div className="mt-6 space-y-2">
-          <h3 className="text-lg font-semibold">Results ({results.length})</h3>
-          {results.map((result, index) => (
-            <div key={index} className="p-4 border rounded-md">
-              <div className="font-medium">{result.title}</div>
-              <div className="text-sm text-gray-600">{result.artist}</div>
-              {result.downloadUrl && (
-                <a
-                  href={result.downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 text-sm hover:underline"
-                >
-                  Open Link
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn btn-primary px-6 normal-case tracking-widest shrink-0"
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.75rem',
+            border: 'none',
+          }}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              SEARCHING
+            </>
+          ) : (
+            <>
+              <Search className="w-3.5 h-3.5" />
+              SEARCH
+            </>
+          )}
+        </button>
+      </div>
+    </form>
   );
 }

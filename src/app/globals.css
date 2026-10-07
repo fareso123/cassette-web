@@ -1,2 +1,192 @@
 @import "tailwindcss";
-@plugin "daisyui";
+
+@plugin "daisyui" {
+  themes: cassette --default, cassette-light;
+}
+
+@plugin "daisyui/theme" {
+  name: "cassette";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: oklch(0.92 0.03 100);
+  --color-base-200: oklch(0.88 0.03 100);
+  --color-base-300: oklch(0.84 0.03 100);
+  --color-base-content: oklch(0.12 0.01 100);
+
+  --color-primary: oklch(0.55 0.32 35);
+  --color-primary-content: oklch(0.98 0.005 100);
+
+  --color-secondary: oklch(0.82 0.08 110);
+  --color-secondary-content: oklch(0.12 0.01 100);
+
+  --color-accent: oklch(0.72 0.28 32);
+  --color-accent-content: oklch(0.98 0.005 100);
+
+  --color-neutral: oklch(0.28 0.01 100);
+  --color-neutral-content: oklch(0.98 0.005 100);
+
+  --color-info: oklch(0.65 0.22 220);
+  --color-info-content: oklch(0.98 0.005 100);
+
+  --color-success: oklch(0.65 0.2 140);
+  --color-success-content: oklch(0.98 0.005 100);
+
+  --color-warning: oklch(0.82 0.18 80);
+  --color-warning-content: oklch(0.12 0.01 100);
+
+  --color-error: oklch(0.65 0.3 30);
+  --color-error-content: oklch(0.98 0.005 100);
+
+  --radius-selector: 0rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
+
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+
+  --border: 1px;
+
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: "cassette-light";
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: oklch(0.95 0.015 110);
+  --color-base-200: oklch(0.91 0.02 110);
+  --color-base-300: oklch(0.87 0.025 110);
+  --color-base-content: oklch(0.12 0.01 100);
+
+  --color-primary: oklch(0.58 0.30 38);
+  --color-primary-content: oklch(0.98 0.005 100);
+
+  --color-secondary: oklch(0.78 0.12 115);
+  --color-secondary-content: oklch(0.12 0.01 100);
+
+  --color-accent: oklch(0.70 0.28 30);
+  --color-accent-content: oklch(0.98 0.005 100);
+
+  --color-neutral: oklch(0.30 0.01 100);
+  --color-neutral-content: oklch(0.98 0.005 100);
+
+  --color-info: oklch(0.65 0.22 220);
+  --color-info-content: oklch(0.98 0.005 100);
+
+  --color-success: oklch(0.65 0.2 140);
+  --color-success-content: oklch(0.98 0.005 100);
+
+  --color-warning: oklch(0.82 0.18 80);
+  --color-warning-content: oklch(0.12 0.01 100);
+
+  --color-error: oklch(0.65 0.3 30);
+  --color-error-content: oklch(0.98 0.005 100);
+
+  --radius-selector: 0rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
+
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+
+  --border: 1px;
+
+  --depth: 0;
+  --noise: 0;
+}
+
+/* Design tokens */
+:root {
+  --c-bg-green: #98A783;
+  --c-bg-orange: #E4511C;
+  --c-text: #1C201C;
+  --c-cta: #ED591A;
+  --c-highlight: #ECEFE6;
+  --c-neon: #86BD16;
+  --c-label: #D5D9D4;
+  --c-dark-box: #141610;
+
+  --font-display: 'Eurostile', 'Russo One', 'Arial Black', sans-serif;
+  --font-condensed: 'Helvetica Condensed', 'Arial Narrow', sans-serif;
+  --font-mono: 'SF Mono', 'Courier New', 'IBM Plex Mono', monospace;
+  --font-sans: 'Helvetica Neue', 'Inter', 'Arial', sans-serif;
+  --font-tech: 'Roboto', 'Open Sans', 'Source Sans Pro', sans-serif;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Poster grain texture */
+.paper-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* Playback arrows utility */
+.playback-arrows {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  color: var(--c-text);
+  opacity: 0.4;
+  user-select: none;
+}
+
+/* Button press feedback */
+.btn {
+  transition: transform 160ms var(--ease-out);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* Monospace utility */
+.font-mono-display {
+  font-family: var(--font-mono);
+}
+
+/* Condensed display */
+.font-condensed-display {
+  font-family: var(--font-condensed);
+}
+
+/* Print-style divider */
+.tech-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--c-text);
+  opacity: 0.5;
+  padding: 0.5rem 0;
+  margin: 0;
+}
+.tech-divider::before,
+.tech-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+  .btn:active {
+    transform: none;
+  }
+}
+
+/* DaisyUI overrides for brutalist feel */
+@utility btn {
+  @apply uppercase tracking-widest font-mono;
+}

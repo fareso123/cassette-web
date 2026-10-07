@@ -1,39 +1,36 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { SearchBar } from "@/components/SearchBar";
-import { ResultsTabs } from "@/components/ResultsTabs";
+import { useState, useEffect } from 'react';
+import { SearchBar } from '@/components/SearchBar';
+import { ResultsTabs } from '@/components/ResultsTabs';
+import { HeroSection } from '@/components/HeroSection';
+import type { ExtractedTrack } from '@/types/extracted';
+import type { ScrapedResult } from '@/types/scraped';
+
+interface RecentSearch {
+  query: string;
+  type: 'song' | 'url';
+  timestamp: string;
+}
+
+const STORAGE_KEY = 'recentSearches';
 
 export default function Home() {
-  const [query, setQuery] = useState("");
-  const [type, setType] = useState<"song" | "url">("song");
+  const [query, setQuery] = useState('');
+  const [type, setType] = useState<'song' | 'url'>('song');
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
-  const [recentSearches, setRecentSearches] = useState<any[]>([]);
-  const [tab, setTab] = useState("song");
+  const [results, setResults] = useState<(ExtractedTrack | ScrapedResult)[]>([]);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
 
-  const recentSearchesFromStorage = () => {
-    if (typeof window === "undefined") return [];
-    const stored = localStorage.getItem("recentSearches");
-    return stored ? JSON.parse(stored) : [];
-  };
-
-  const saveToRecent = (query: string, type: string) => {
-    if (typeof window === "undefined") return;
-    const searches = recentSearchesFromStorage();
-    const exists = searches.some((s: any) => s.query === query);
-    const updated = exists
-      ? searches.filter((s: any) => s.query !== query)
-      : [
-          {
-            query,
-            type,
-            timestamp: new Date().toISOString(),
-          },
-        ].concat(searches.slice(0, 4));
-    localStorage.setItem("recentSearches", JSON.stringify(updated));
-    setRecentSearches(updated);
-  };
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = localStorage.getItem(STORAGE_KEY);
+    try {
+      setRecentSearches(stored ? (JSON.parse(stored) as RecentSearch[]) : []);
+    } catch {
+      setRecentSearches([]);
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,123 +38,122 @@ export default function Home() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: query.trim(), type }),
       });
 
       if (!response.ok) {
-        throw new Error("Search failed");
+        throw new Error('Search failed');
       }
 
       const data = await response.json();
       setResults(data.results || []);
       saveToRecent(query, type);
     } catch (error) {
-      console.error("Search error:", error);
+      console.error('Search error:', error);
       setResults([]);
     } finally {
       setLoading(false);
     }
   }
 
+  function saveToRecent(q: string, t: 'song' | 'url') {
+    if (typeof window === 'undefined') return;
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const searches: RecentSearch[] = stored ? JSON.parse(stored) : [];
+    const exists = searches.some((s) => s.query === q);
+    const updated = exists
+      ? searches.filter((s) => s.query !== q)
+      : [{ query: q, type: t, timestamp: new Date().toISOString() }, ...searches].slice(0, 5);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setRecentSearches(updated);
+  }
+
   const ytDlpResults = results.filter(
-    (r: any) => r && r.directAudioUrl
-  ) as any[];
+    (r): r is ExtractedTrack => r !== null && typeof r === 'object' && 'directAudioUrl' in r
+  );
   const scraperResults = results.filter(
-    (r: any) => r && !r.directAudioUrl
-  ) as any[];
+    (r): r is ScrapedResult => r !== null && typeof r === 'object' && !('directAudioUrl' in r)
+  );
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-center text-gray-900 mb-2">
-          Cassette Web
-        </h1>
-        <p className="text-center text-gray-600 mb-8">
-          Search songs and find download links - YouTube, torrents, and more
-        </p>
+    <div className="paper-grain">
+      <HeroSection />
 
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Search</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setType("song")}
-                  className={`flex-1 px-4 py-2 rounded-md border transition-colors ${
-                    type === "song"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Song Name
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setType("url")}
-                  className={`flex-1 px-4 py-2 rounded-md border transition-colors ${
-                    type === "url"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  YouTube URL
-                </button>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={
-                    type === "url"
-                      ? "Paste YouTube URL..."
-                      : "Search for songs..."
-                  }
-                  className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 transition-colors"
-                >
-                  {loading ? "Searching..." : "Search"}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {recentSearches.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Searches</h2>
-              <ul className="space-y-2">
-                {recentSearches.map((search: any, index: number) => (
-                  <li
-                    key={index}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
-                    onClick={() => {
-                      setQuery(search.query);
-                      setType(search.type as "song" | "url");
-                    }}
-                  >
-                    <span>{search.query}</span>
-                    <span className="text-xs text-gray-500">
-                      {new Date(search.timestamp).toLocaleDateString()}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {results.length > 0 && (
-            <ResultsTabs results={results} ytDlpResults={ytDlpResults} scraperResults={scraperResults} tab={tab} setTab={setTab} />
-          )}
+      {/* Search section */}
+      <section className="border-y border-base-content/20 bg-base-100">
+        <div
+          className="px-6 py-2 flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-base-content/40"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          <span>SEARCH MODULE</span>
+          <span className="text-base-content/20">·</span>
+          <span>v2.0.1 · HF-S 800</span>
         </div>
-      </div>
-    </main>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto">
+            <SearchBar
+              query={query}
+              type={type}
+              loading={loading}
+              onQueryChange={setQuery}
+              onTypeChange={setType}
+              onSubmit={handleSubmit}
+            />
+
+            {/* Recent searches */}
+            {recentSearches.length > 0 && (
+              <div className="mt-6">
+                <div
+                  className="flex items-center gap-3 mb-3 text-[10px] uppercase tracking-[0.2em] text-base-content/40"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
+                  <span>RECENT SEARCHES</span>
+                  <span className="flex-1 h-px bg-base-content/20" />
+                  <span>{recentSearches.length} ENTRIES</span>
+                </div>
+                <ul className="space-y-1">
+                  {recentSearches.map((search, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-base-content/60 hover:text-base-content hover:bg-base-200 cursor-pointer transition-colors"
+                      style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}
+                      onClick={() => {
+                        setQuery(search.query);
+                        setType(search.type);
+                      }}
+                    >
+                      <span>{search.query}</span>
+                      <span className="text-base-content/30">{search.type} · {new Date(search.timestamp).toLocaleDateString()}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Results section */}
+      {results.length > 0 && (
+        <section className="border-t border-base-content/20 bg-base-100">
+          <div
+            className="px-6 py-2 flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-base-content/40"
+            style={{ fontFamily: 'var(--font-mono)' }}
+          >
+            <span>RESULTS</span>
+            <span className="text-base-content/20">·</span>
+            <span>{results.length} TRACKS FOUND</span>
+          </div>
+          <ResultsTabs
+            results={results}
+            ytDlpResults={ytDlpResults}
+            scraperResults={scraperResults}
+          />
+        </section>
+      )}
+    </div>
   );
 }
