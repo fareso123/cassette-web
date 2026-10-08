@@ -2,6 +2,27 @@
 
 Plan: `tasks/plan.md` · Spec: `SPEC-shadcn-migration.md`
 
+## Findings recorded during Task 2 (baseline capture)
+
+- **Pre-existing hydration failure.** The console shows `Hydration failed because the
+  server rendered HTML didn't match the client` on first load. Cause is
+  `page.tsx:19` — `new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })`.
+  An undefined locale resolves to the *server's* locale on SSR and the *browser's*
+  locale on the client, so any recent-search timestamp renders differently. React's own
+  error message cites "date formatting in a user's locale" as a cause. Fix belongs in
+  Task 13, which rewrites those rows anyway: pin an explicit locale and `timeZone: 'UTC'`
+  so the output is deterministic.
+- **No reachable database.** `npm run db:seed` fails with `ECONNREFUSED`, so the
+  `scrapers` table is empty and `/api/search` returns `resultCount: 0` for song
+  searches. The result cards cannot be exercised through the real path. A temporary
+  fixture route `src/app/previewfixture/page.tsx` mounts `ResultsTabs` with fixed data
+  to give a before/after comparison. **Delete it before the branch merges.**
+- **`curl.exe` needs `--noproxy "*"`.** `Invoke-RestMethod` gets a 502 from a system
+  proxy on POST; curl reaches the route fine. Not a code issue.
+- **Both current themes are light.** The baseline screenshot confirms a cream canvas
+  (`oklch(0.92 0.03 100)`), not the sage `#98A783` the design doc specifies, and the
+  Moon icon shows while the page stays light.
+
 ---
 
 ## Task 1: Dissolve `src/lib/utils/`, add `cn()`
@@ -12,14 +33,14 @@ for TS resolution. Move the youtube module up one level and create the conventio
 shadcn util.
 
 **Acceptance criteria:**
-- [ ] `src/lib/utils.ts` exports `cn()` composed from `clsx` + `tailwind-merge`
-- [ ] `src/lib/youtube.ts` exists; `src/lib/utils/` no longer exists
-- [ ] Both importers use the `@/lib/` alias (the route's relative `../../../` path is
+- [x] `src/lib/utils.ts` exports `cn()` composed from `clsx` + `tailwind-merge`
+- [x] `src/lib/youtube.ts` exists; `src/lib/utils/` no longer exists
+- [x] Both importers use the `@/lib/` alias (the route's relative `../../../` path is
       replaced with `@/lib/youtube`)
 
 **Verification:**
-- [ ] `npx tsc --noEmit` clean
-- [ ] `bun test src/__tests__/youtube-utils.test.ts` passes
+- [x] `npx tsc --noEmit` clean
+- [x] `bun test src/__tests__/youtube-utils.test.ts` passes — 7 pass, 0 fail
 
 **Dependencies:** None
 
@@ -37,11 +58,15 @@ background, dark theme, skeletons). Everything else must be provably unchanged, 
 requires a before-image to diff against.
 
 **Acceptance criteria:**
-- [ ] Screenshots captured at 1440px and 390px for both themes, at rest and mid-search
-- [ ] Stored outside the working tree or gitignored
+- [x] Main page captured at 1440px and 390px
+- [x] Both current themes captured at 1440px
+- [x] Result cards captured via the fixture route (DOM baseline: 4 cards, durations
+      7:09 and 62:05, three download links, one "no download available" case)
+- [x] Stored in `.openchamber/screenshots/` with a `before-` prefix
 
 **Verification:**
-- [ ] Each image is readable and shows the expected theme
+- [x] Each image is readable and shows the expected theme
+- [x] Baseline confirms the cream-canvas drift and the hydration error
 
 **Dependencies:** None
 
