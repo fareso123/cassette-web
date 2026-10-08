@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { ThemeController } from './ThemeController';
 
 export function Navbar() {
@@ -19,38 +18,16 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Main nav bar */}
+      {/* Main nav bar. No logo mark yet — one is being designed. */}
       <div className="flex items-center justify-between px-6 py-3">
-        <Link
-          href="/"
-          className="focus-visible:ring-ring flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-offset-2"
-        >
-          {/* Cassette icon */}
-          <svg
-            width="28"
-            height="18"
-            viewBox="0 0 28 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="shrink-0"
+        <div className="flex items-center gap-2">
+          <span
+            className="text-muted-foreground border-border flex size-9 items-center justify-center border border-dashed text-[10px]"
             aria-hidden="true"
           >
-            <rect x="0.75" y="0.75" width="26.5" height="16.5" rx="1" stroke="currentColor" strokeWidth="1.5" />
-            <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.2" />
-            <circle cx="19" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.2" />
-            <line x1="0.75" y1="5.5" x2="27.25" y2="5.5" stroke="currentColor" strokeWidth="1" />
-            <line x1="0.75" y1="12.5" x2="27.25" y2="12.5" stroke="currentColor" strokeWidth="1" />
-            <rect x="10" y="1.5" width="8" height="3" rx="0.5" stroke="currentColor" strokeWidth="1" />
-          </svg>
-          <div className="flex flex-col">
-            <span className="font-display text-lg leading-none font-bold tracking-tight">
-              <span translate="no">COUNDEX</span>
-            </span>
-            <span className="text-muted-foreground text-[9px] tracking-[0.2em]">
-              HF-S 800
-            </span>
-          </div>
-        </Link>
+            LOGO
+          </span>
+        </div>
 
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground mr-2 hidden text-[10px] tracking-[0.15em] md:inline">

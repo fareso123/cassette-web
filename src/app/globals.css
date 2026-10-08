@@ -106,8 +106,6 @@
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
-
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 /* Poster grain texture */
@@ -161,16 +159,6 @@
 
 .spin-slow {
   animation: spin-slow 24s linear infinite;
-}
-
-/*
- * Hover affordances are gated on a real pointer. Touch devices fire :hover on
- * tap, which leaves a false hover state stuck after the finger lifts.
- */
-@media (hover: hover) and (pointer: fine) {
-  .hover-lift:hover {
-    background-color: var(--muted);
-  }
 }
 
 /*

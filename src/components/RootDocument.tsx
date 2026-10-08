@@ -43,9 +43,9 @@ function DocumentShell({
       suppressHydrationWarning
     >
       {/*
-        paper-grain lives here only. It used to also sit on the page wrapper,
-        Navbar and Footer, stacking four 0.04-opacity noise layers into
-        visible mottling.
+        paper-grain lives here only. It also sits on the page wrapper, Navbar
+        and Footer, which stacks four 0.04-opacity noise layers into visible
+        mottling rather than reading as a subtle texture.
       */}
       <body className="paper-grain bg-background text-foreground font-sans min-h-screen">
         <a
@@ -54,13 +54,6 @@ function DocumentShell({
         >
           Skip to content
         </a>
-
-        {/*
-          The fixed page-wide "CX" watermark is removed. It duplicated the
-          giant background "C" in HeroSection at lower opacity, so the two
-          stacked on every screen, and design2.md's "Giant BG" row describes a
-          single element.
-        */}
 
         <div className="relative z-10 flex min-h-screen flex-col">
           <Navbar />

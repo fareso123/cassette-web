@@ -17,12 +17,6 @@ export function HeroSection() {
           </div>
 
           {/* Main logo */}
-          {/*
-            The giant background "C" that used to sit behind the wordmark is
-            gone. The page-wide "CX" in layout.tsx did the same job at lower
-            opacity, so the two stacked, and design2.md's "Giant BG" row
-            describes one element rather than two.
-          */}
           <div className="relative mb-6 inline-flex flex-col items-center">
             {/* Decorative loop; stops under prefers-reduced-motion */}
             <Disc
