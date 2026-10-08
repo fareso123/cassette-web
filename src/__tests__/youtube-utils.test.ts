@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { parseYouTubeUrl, stripVideoIndicators } from '@/lib/utils/youtube';
+import { parseYouTubeUrl, stripVideoIndicators } from '@/lib/youtube';
 
 describe('YouTube URL utilities', () => {
   test('should parse YouTube video URLs to videoId', () => {

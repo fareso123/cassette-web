@@ -1,4 +1,4 @@
-import { extractSongTitle, stripVideoIndicators } from '../extractors/yt-dlp';
+import { extractSongTitle, stripVideoIndicators } from './extractors/yt-dlp';
 
 export interface YouTubeUrlInfo {
   videoId: string | null;

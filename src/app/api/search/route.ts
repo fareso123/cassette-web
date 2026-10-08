@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkRateLimit } from '../../../lib/rate-limit';
-import { parseYouTubeUrl } from '../../../lib/utils/youtube';
+import { parseYouTubeUrl } from '@/lib/youtube';
 import { extract } from '../../../lib/extractors/yt-dlp';
 import { scraperRegistry } from '../../../lib/scrapers/registry';
 import { validateSession } from '../../../lib/session';
