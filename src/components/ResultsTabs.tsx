@@ -1,14 +1,28 @@
 'use client';
 
-import { useId, useRef, useState } from 'react';
 import type { ExtractedTrack } from '@/types/extracted';
 import type { ScrapedResult } from '@/types/scraped';
+import { Badge } from '@/components/ui/badge';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import { ResultCard } from './ResultCard';
 
 interface ResultsTabsProps {
   results: (ExtractedTrack | ScrapedResult)[];
   ytDlpResults: ExtractedTrack[];
   scraperResults: ScrapedResult[];
+  loading?: boolean;
 }
 
 type Card = React.ComponentProps<typeof ResultCard>;
@@ -46,109 +60,108 @@ function resultKey(result: ExtractedTrack | ScrapedResult): string {
   return result.downloadUrl || result.title;
 }
 
+/**
+ * Skeleton placeholders for the results grid. Same two-column shape as the
+ * real grid, so the layout does not jump when results land. Six matches the
+ * typical page of scraper hits without pretending to know the count.
+ */
+const SKELETON_COUNT = 6;
+
+function ResultGrid({
+  results,
+  loading,
+}: {
+  results: (ExtractedTrack | ScrapedResult)[];
+  loading?: boolean;
+}) {
+  if (loading) {
+    return (
+      <div
+        className="grid grid-cols-1 gap-3 md:grid-cols-2"
+        aria-hidden="true"
+      >
+        {Array.from({ length: SKELETON_COUNT }, (_, i) => (
+          <div
+            key={i}
+            className="border-border bg-card flex h-44 flex-col gap-3 border p-4"
+          >
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="mt-auto h-8 w-full" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (results.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      {results.map(result => (
+        <ResultCard key={resultKey(result)} {...toCard(result)} />
+      ))}
+    </div>
+  );
+}
+
 export function ResultsTabs({
   results,
   ytDlpResults,
   scraperResults,
+  loading = false,
 }: ResultsTabsProps) {
-  const [activeTab, setActiveTab] = useState(0);
-  const baseId = useId();
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
   const tabs = [
-    { label: 'All', results: results },
-    { label: 'YouTube', results: ytDlpResults },
-    { label: 'Scrapers', results: scraperResults },
+    { value: 'all', label: 'All', results: results },
+    { value: 'youtube', label: 'YouTube', results: ytDlpResults },
+    { value: 'scrapers', label: 'Scrapers', results: scraperResults },
   ];
-
-  const active = tabs[activeTab] ?? tabs[0];
-  const isEmpty = active.results.length === 0;
-
-  function onKeyDown(e: React.KeyboardEvent, index: number) {
-    const last = tabs.length - 1;
-    let next: number | null = null;
-
-    if (e.key === 'ArrowRight') next = index === last ? 0 : index + 1;
-    else if (e.key === 'ArrowLeft') next = index === 0 ? last : index - 1;
-    else if (e.key === 'Home') next = 0;
-    else if (e.key === 'End') next = last;
-
-    if (next === null) return;
-    e.preventDefault();
-    setActiveTab(next);
-    tabRefs.current[next]?.focus();
-  }
 
   return (
     <div className="font-mono">
-      {/* Tab strip */}
-      <div
-        role="tablist"
-        aria-label="Filter results by source"
-        className="border-b border-base-content/20 flex"
-      >
-        {tabs.map((tab, i) => {
-          const selected = activeTab === i;
-          return (
-            <button
-              key={tab.label}
-              id={`${baseId}-tab-${i}`}
-              ref={(el) => {
-                tabRefs.current[i] = el;
-              }}
-              role="tab"
-              type="button"
-              aria-selected={selected}
-              aria-controls={`${baseId}-panel-${i}`}
-              tabIndex={selected ? 0 : -1}
-              onClick={() => setActiveTab(i)}
-              onKeyDown={(e) => onKeyDown(e, i)}
-              className={`flex-1 px-4 py-3 text-[10px] uppercase tracking-widest transition-colors border-r border-base-content/20 last:border-r-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${
-                selected
-                  ? 'bg-primary text-primary-content border-b-2 border-primary-content'
-                  : 'bg-base-100 text-base-content/60 hover:bg-base-200'
-              }`}
+      <Tabs defaultValue="all" className="gap-0">
+        <TabsList
+          variant="line"
+          className="border-border w-full justify-stretch border-b p-0"
+        >
+          {tabs.map(tab => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="border-border text-muted-foreground hover:text-foreground flex-1 border-r px-4 py-3 text-[10px] tracking-widest last:border-r-0 data-active:border-foreground data-active:text-foreground data-active:after:hidden"
             >
               <span>{tab.label}</span>
-              <span
-                className={`ml-2 inline-flex items-center justify-center w-5 h-5 text-[9px] tabular-nums ${
-                  selected
-                    ? 'bg-primary-content text-primary'
-                    : 'bg-base-content/10 text-base-content/70'
-                }`}
+              <Badge
+                variant="secondary"
+                className="ml-2 h-5 min-w-5 justify-center px-1 text-[9px] tabular-nums"
               >
                 {tab.results.length}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              </Badge>
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {/* Results */}
-      <div
-        role="tabpanel"
-        id={`${baseId}-panel-${activeTab}`}
-        aria-labelledby={`${baseId}-tab-${activeTab}`}
-        tabIndex={0}
-        className="p-4 focus-visible:outline-2 focus-visible:outline-primary"
-      >
-        {isEmpty ? (
-          <div className="text-center py-12 text-base-content/60 uppercase tracking-widest text-xs">
-            <p>NO RESULTS FOUND</p>
-            <p className="mt-2 normal-case tracking-normal text-base-content/50">
-              {activeTab === 0
-                ? 'Try a different song title, or paste a YouTube URL instead.'
-                : 'No results from this source. Try the All tab.'}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {active.results.map((result) => (
-              <ResultCard key={resultKey(result)} {...toCard(result)} />
-            ))}
-          </div>
-        )}
-      </div>
+        {tabs.map(tab => (
+          <TabsContent key={tab.value} value={tab.value} className="p-4">
+            {!loading && tab.results.length === 0 ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyTitle className="text-xs tracking-widest">
+                    No results found
+                  </EmptyTitle>
+                  <EmptyDescription className="text-muted-foreground normal-case tracking-normal">
+                    {tab.value === 'all'
+                      ? 'Try a different song title, or paste a YouTube URL instead.'
+                      : 'No results from this source. Try the All tab.'}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <ResultGrid results={tab.results} loading={loading} />
+            )}
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 }

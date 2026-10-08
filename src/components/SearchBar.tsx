@@ -1,6 +1,14 @@
 'use client';
 
-import { Search, Music, Link2, Loader2 } from 'lucide-react';
+import { Search, Music, Link2 } from 'lucide-react';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@/components/ui/input-group';
+import { Spinner } from '@/components/ui/spinner';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface SearchBarProps {
   query: string;
@@ -23,91 +31,92 @@ export function SearchBar({
 
   return (
     <form onSubmit={onSubmit} className="font-mono">
-      {/* Mode toggle */}
-      <div
-        role="group"
-        aria-label="Search mode"
-        className="flex gap-0 mb-4 border border-base-content/20"
+      {/*
+        ToggleGroup replaces the old role="group" + aria-pressed pair. Base UI
+        moves this between items with a single tab stop and arrow keys, where
+        the previous markup made each button its own tab stop.
+      */}
+      {/*
+        Base UI's ToggleGroup is always multi-select under the hood: `value`
+        is an array even when `multiple` is false. Passing a single string
+        coerces and TS rejects it, so the scalar prop state is bridged here.
+      */}
+      <ToggleGroup
+        value={[type]}
+        onValueChange={value => {
+          const next = value[0];
+          // Deselecting the active item would leave no mode at all, which
+          // the search route cannot handle. Ignore an empty selection.
+          if (next) onTypeChange(next as 'song' | 'url');
+        }}
+        variant="outline"
+        className="mb-4 w-full"
       >
-        <button
-          type="button"
-          onClick={() => onTypeChange('song')}
-          aria-pressed={!isUrl}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-widest transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-            !isUrl
-              ? 'bg-primary text-primary-content'
-              : 'bg-base-100 text-base-content/60 hover:bg-base-200'
-          }`}
-        >
-          <Music className="w-3.5 h-3.5" aria-hidden="true" />
+        <ToggleGroupItem value="song" className="flex-1 py-3 text-xs tracking-widest">
+          <Music data-icon="inline-start" aria-hidden="true" />
           Song Name
-        </button>
-        <button
-          type="button"
-          onClick={() => onTypeChange('url')}
-          aria-pressed={isUrl}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs uppercase tracking-widest transition-colors border-l border-base-content/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-            isUrl
-              ? 'bg-primary text-primary-content'
-              : 'bg-base-100 text-base-content/60 hover:bg-base-200'
-          }`}
-        >
-          <Link2 className="w-3.5 h-3.5" aria-hidden="true" />
+        </ToggleGroupItem>
+        <ToggleGroupItem value="url" className="flex-1 py-3 text-xs tracking-widest">
+          <Link2 data-icon="inline-start" aria-hidden="true" />
           YouTube URL
-        </button>
-      </div>
+        </ToggleGroupItem>
+      </ToggleGroup>
 
       {/* Search input + submit */}
-      <div className="flex gap-0">
-        <div className="relative flex-1 min-w-0">
-          <label htmlFor="search-query" className="sr-only">
-            {isUrl ? 'YouTube URL' : 'Song name'}
-          </label>
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40"
-            aria-hidden="true"
-          />
-          <input
-            id="search-query"
-            name="query"
-            type={isUrl ? 'url' : 'search'}
-            inputMode={isUrl ? 'url' : 'search'}
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            placeholder={
-              isUrl ? 'https://youtube.com/watch?v=…' : 'Enter song title or artist…'
-            }
-            autoComplete="off"
-            spellCheck={false}
-            aria-describedby="search-hint"
-            className="w-full bg-base-100 border border-base-content/20 pl-10 pr-4 py-3 text-sm tracking-wide placeholder:text-base-content/30 focus:outline-none focus-visible:border-primary"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn btn-primary px-6 tracking-widest shrink-0"
-        >
-          {loading ? (
-            <>
-              <Loader2
-                className="w-3.5 h-3.5 motion-safe:animate-spin"
-                aria-hidden="true"
-              />
-              SEARCHING
-            </>
-          ) : (
-            <>
-              <Search className="w-3.5 h-3.5" aria-hidden="true" />
-              SEARCH
-            </>
-          )}
-        </button>
-      </div>
+      <InputGroup className="h-auto py-0">
+        <InputGroupAddon>
+          <Search aria-hidden="true" className="text-muted-foreground" />
+        </InputGroupAddon>
+
+        {/*
+          type is always "search". The old markup set type="url" in URL mode,
+          which made the browser block submission through native constraint
+          validation and show its own bubble instead of the app's role="alert"
+          region. inputMode still gives URL keyboards on mobile; validation
+          belongs to one place, and the server already does it.
+        */}
+        <InputGroupInput
+          id="search-query"
+          name="query"
+          type="search"
+          inputMode={isUrl ? 'url' : 'search'}
+          value={query}
+          onChange={e => onQueryChange(e.target.value)}
+          placeholder={
+            isUrl ? 'https://youtube.com/watch?v=…' : 'Enter song title or artist…'
+          }
+          autoComplete="off"
+          spellCheck={false}
+          aria-describedby="search-hint"
+          className="py-3 text-sm tracking-wide placeholder:text-muted-foreground"
+        />
+
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            type="submit"
+            variant="default"
+            size="sm"
+            disabled={loading}
+            className="h-9 px-6 tracking-widest"
+          >
+            {loading ? (
+              <>
+                <Spinner data-icon="inline-start" />
+                SEARCHING
+              </>
+            ) : (
+              <>
+                <Search data-icon="inline-start" aria-hidden="true" />
+                SEARCH
+              </>
+            )}
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
 
       <p
         id="search-hint"
-        className="mt-2 text-[0.65rem] uppercase tracking-widest text-base-content/50"
+        className="text-muted-foreground mt-2 text-[0.65rem] tracking-widest"
       >
         {isUrl
           ? 'Paste a YouTube video or playlist link'

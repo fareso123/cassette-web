@@ -2,18 +2,33 @@
 
 import { useCallback, useSyncExternalStore } from 'react';
 import { Sun, Moon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+/*
+ * Theme state.
+ *
+ * shadcn's dark mode is a `.dark` class on <html> combined with
+ * `@custom-variant dark (&:is(.dark *))` in globals.css. The previous daisyUI
+ * themes were both light, so the old controller's Moon icon was a lie: you
+ * pressed it and got cream. There is now a real dark canvas.
+ *
+ * The stored value is the dark/light preference, not a theme name, so adding a
+ * third theme later does not need a migration of localStorage.
+ */
 
 const STORAGE_KEY = 'theme-preference';
-const DEFAULT_THEME = 'cassette';
-const ALT_THEME = 'cassette-light';
 
-const isTheme = (value: string | null): boolean =>
-  value === DEFAULT_THEME || value === ALT_THEME;
+type Theme = 'light' | 'dark';
 
-function readStoredTheme(): string {
+const DEFAULT_THEME: Theme = 'light';
+
+const isTheme = (value: string | null): value is Theme =>
+  value === 'light' || value === 'dark';
+
+function readStoredTheme(): Theme {
   if (typeof window === 'undefined') return DEFAULT_THEME;
   const stored = localStorage.getItem(STORAGE_KEY);
-  return isTheme(stored) ? (stored as string) : DEFAULT_THEME;
+  return isTheme(stored) ? stored : DEFAULT_THEME;
 }
 
 // Server snapshot is the default theme, so the server render and the first
@@ -40,30 +55,31 @@ export function ThemeController() {
   );
 
   const toggleTheme = useCallback(() => {
-    const next = readStoredTheme() === DEFAULT_THEME ? ALT_THEME : DEFAULT_THEME;
+    const next = readStoredTheme() === 'dark' ? 'light' : 'dark';
     localStorage.setItem(STORAGE_KEY, next);
-    document.documentElement.setAttribute('data-theme', next);
+    document.documentElement.classList.toggle('dark', next === 'dark');
     // Storage events do not fire in the tab that wrote them.
     window.dispatchEvent(new Event('storage'));
   }, []);
 
-  const label =
-    theme === DEFAULT_THEME ? 'Switch to light theme' : 'Switch to default theme';
+  const isDark = theme === 'dark';
+  const label = isDark ? 'Switch to light theme' : 'Switch to dark theme';
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon-sm"
       onClick={toggleTheme}
-      className="btn btn-ghost btn-circle btn-sm"
       aria-label={label}
       title={label}
-      aria-pressed={theme === ALT_THEME}
+      aria-pressed={isDark}
     >
-      {mounted && theme === ALT_THEME ? (
-        <Moon className="w-4 h-4" aria-hidden="true" />
+      {mounted && isDark ? (
+        <Moon aria-hidden="true" />
       ) : (
-        <Sun className="w-4 h-4" aria-hidden="true" />
+        <Sun aria-hidden="true" />
       )}
-    </button>
+    </Button>
   );
 }

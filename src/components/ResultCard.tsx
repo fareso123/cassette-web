@@ -1,6 +1,14 @@
 'use client';
 
 import { Download, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 interface ResultCardProps {
   title: string;
@@ -25,10 +33,10 @@ export function ResultCard({
   duration,
 }: ResultCardProps) {
   return (
-    <div className="border border-base-content/20 bg-base-100 hover:bg-base-200 transition-colors group flex flex-col">
+    <Card className="border-border bg-card ring-0 group border py-0 transition-colors hover:bg-muted">
       {/* Thumbnail strip */}
-      {thumbnail && (
-        <div className="relative h-32 shrink-0 overflow-hidden border-b border-base-content/20">
+      {thumbnail ? (
+        <div className="border-border relative h-32 shrink-0 overflow-hidden border-b">
           {/*
             Deliberately a plain <img>, not next/image. Thumbnails come from
             whatever host the yt-dlp extractor or scraper returns, so
@@ -46,69 +54,72 @@ export function ResultCard({
             loading="lazy"
             decoding="async"
             referrerPolicy="no-referrer"
-            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+            className="h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-100"
           />
           {/* Duration overlay */}
           {duration ? (
-            <div className="absolute bottom-2 right-2 bg-base-content text-base-100 px-2 py-0.5 text-[10px] uppercase tracking-wider flex items-center gap-1 tabular-nums">
-              <Clock className="w-3 h-3" aria-hidden="true" />
+            <div className="bg-foreground text-background absolute right-2 bottom-2 flex items-center gap-1 px-2 py-0.5 text-[10px] tracking-wider tabular-nums">
+              <Clock className="size-3" aria-hidden="true" />
               <span className="sr-only">Duration </span>
               {formatDuration(duration)}
             </div>
           ) : null}
         </div>
-      )}
+      ) : null}
 
-      <div className="p-4 flex flex-col flex-1">
-        {/* Title */}
-        <div className="text-sm font-bold tracking-wide mb-1 leading-tight line-clamp-2 break-words">
+      <CardHeader className="gap-0 px-4 pt-4">
+        <CardTitle className="font-mono text-sm leading-tight font-bold tracking-wide break-words line-clamp-2">
           {title}
-        </div>
+        </CardTitle>
+      </CardHeader>
 
+      <CardContent className="px-4 pb-4">
         {/* Meta row */}
-        <div className="flex items-center gap-2 mb-3 text-[10px] uppercase tracking-widest min-w-0">
-          {artist ? (
-            <span className="text-base-content/70 truncate">{artist}</span>
-          ) : null}
+        <div className="text-muted-foreground mt-1 mb-3 flex min-w-0 items-center gap-2 text-[10px] tracking-widest">
+          {artist ? <span className="truncate">{artist}</span> : null}
           {source ? (
             <>
-              <span className="text-base-content/30 shrink-0">·</span>
-              <span className="text-base-content/70 truncate">{source}</span>
+              <span className="shrink-0 opacity-50">·</span>
+              <span className="truncate">{source}</span>
             </>
           ) : null}
           {duration && !thumbnail ? (
             <>
-              <span className="text-base-content/30 shrink-0">·</span>
-              <span className="flex items-center gap-1 text-base-content/70 shrink-0 tabular-nums">
-                <Clock className="w-3 h-3" aria-hidden="true" />
+              <span className="shrink-0 opacity-50">·</span>
+              <span className="flex shrink-0 items-center gap-1 tabular-nums">
+                <Clock className="size-3" aria-hidden="true" />
                 {formatDuration(duration)}
               </span>
             </>
           ) : null}
         </div>
+      </CardContent>
 
-        {/* Action */}
+      <CardFooter className="border-border mt-auto border-t bg-transparent p-4 pt-0">
         {downloadUrl ? (
-          <a
-            href={downloadUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-accent btn-block btn-sm gap-2 mt-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          <Button
+            render={
+              // An anchor, not a button: this opens a cross-origin download in
+              // a new tab, which is a navigation, not an in-page action.
+              <a href={downloadUrl} target="_blank" rel="noopener noreferrer" />
+            }
+            variant="default"
+            className="w-full gap-2"
           >
-            <Download className="w-3.5 h-3.5" aria-hidden="true" />
+            <Download data-icon="inline-start" aria-hidden="true" />
             Download
-          </a>
+          </Button>
         ) : (
           <>
             {/* Visible text, not a disabled control: a disabled button is
                 unfocusable, so the message would be invisible to keyboard
                 and screen-reader users. */}
-            <p className="mt-auto text-[0.65rem] uppercase tracking-widest text-base-content/60 border border-base-content/20 px-3 py-2 text-center">
+            <p className="text-muted-foreground border-border w-full border px-3 py-2 text-center text-[0.65rem] tracking-widest">
               No download available
             </p>
           </>
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
