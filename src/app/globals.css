@@ -1,125 +1,113 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
-@plugin "daisyui" {
-  themes: cassette --default, cassette-light;
-}
+@custom-variant dark (&:is(.dark *));
 
-@plugin "daisyui/theme" {
-  name: "cassette";
-  default: true;
-  prefersdark: false;
-  color-scheme: light;
-
-  --color-base-100: oklch(0.92 0.03 100);
-  --color-base-200: oklch(0.88 0.03 100);
-  --color-base-300: oklch(0.84 0.03 100);
-  --color-base-content: oklch(0.12 0.01 100);
-
-  --color-primary: oklch(0.55 0.32 35);
-  --color-primary-content: oklch(0.98 0.005 100);
-
-  --color-secondary: oklch(0.82 0.08 110);
-  --color-secondary-content: oklch(0.12 0.01 100);
-
-  --color-accent: oklch(0.72 0.28 32);
-  --color-accent-content: oklch(0.98 0.005 100);
-
-  --color-neutral: oklch(0.28 0.01 100);
-  --color-neutral-content: oklch(0.98 0.005 100);
-
-  --color-info: oklch(0.65 0.22 220);
-  --color-info-content: oklch(0.98 0.005 100);
-
-  --color-success: oklch(0.65 0.2 140);
-  --color-success-content: oklch(0.98 0.005 100);
-
-  --color-warning: oklch(0.82 0.18 80);
-  --color-warning-content: oklch(0.12 0.01 100);
-
-  --color-error: oklch(0.65 0.3 30);
-  --color-error-content: oklch(0.98 0.005 100);
-
-  --radius-selector: 0rem;
-  --radius-field: 0rem;
-  --radius-box: 0rem;
-
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-
-  --border: 1px;
-
-  --depth: 0;
-  --noise: 0;
-}
-
-@plugin "daisyui/theme" {
-  name: "cassette-light";
-  default: false;
-  prefersdark: false;
-  color-scheme: light;
-
-  --color-base-100: oklch(0.97 0.012 110);
-  --color-base-200: oklch(0.93 0.018 110);
-  --color-base-300: oklch(0.89 0.022 110);
-  --color-base-content: oklch(0.12 0.01 100);
-
-  --color-primary: oklch(0.58 0.30 38);
-  --color-primary-content: oklch(0.98 0.005 100);
-
-  --color-secondary: oklch(0.78 0.12 115);
-  --color-secondary-content: oklch(0.12 0.01 100);
-
-  --color-accent: oklch(0.70 0.28 30);
-  --color-accent-content: oklch(0.98 0.005 100);
-
-  --color-neutral: oklch(0.30 0.01 100);
-  --color-neutral-content: oklch(0.98 0.005 100);
-
-  --color-info: oklch(0.65 0.22 220);
-  --color-info-content: oklch(0.98 0.005 100);
-
-  --color-success: oklch(0.65 0.2 140);
-  --color-success-content: oklch(0.98 0.005 100);
-
-  --color-warning: oklch(0.82 0.18 80);
-  --color-warning-content: oklch(0.12 0.01 100);
-
-  --color-error: oklch(0.65 0.3 30);
-  --color-error-content: oklch(0.98 0.005 100);
-
-  --radius-selector: 0rem;
-  --radius-field: 0rem;
-  --radius-box: 0rem;
-
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-
-  --border: 1px;
-
-  --depth: 0;
-  --noise: 0;
-}
-
-/* Design tokens */
+/*
+ * Theme tokens.
+ *
+ * Palette values come from design2.md. Two deliberate corrections to the
+ * previous daisyUI themes:
+ *
+ * 1. --muted-foreground is a SOLID derived colour, never `foreground/50`.
+ *    On the sage canvas, foreground at 50% alpha composites to #5A634F at
+ *    2.40:1, which fails WCAG AA. A solid value clears the bar. Alpha steps
+ *    are only ever applied to this token, and only at /70 or higher.
+ *
+ * 2. --primary-foreground is near-black, not white. #ECEFE6 on #ED591A is
+ *    3.48:1 and fails AA; #1C201C on #ED591A is 4.75:1 and passes.
+ *
+ * --destructive is a text colour (the search error line), so it is dark
+ * enough to read on sage in the light theme and bright enough to read on the
+ * near-black canvas in the dark theme.
+ *
+ * src/__tests__/tokens-contrast.test.ts enforces every pair declared below.
+ */
 :root {
-  --c-bg-green: #98a783;
-  --c-bg-orange: #e4511c;
-  --c-text: #1c201c;
-  --c-cta: #ed591a;
-  --c-highlight: #ecefe6;
-  --c-neon: #86bd16;
-  --c-label: #d5d9d4;
-  --c-dark-box: #141610;
+  --background: #98a783; /* sage canvas — design2.md §2 */
+  --foreground: #1c201c;
+  --card: #98a783;
+  --card-foreground: #1c201c;
+  --popover: #98a783;
+  --popover-foreground: #1c201c;
+  --primary: #ed591a;
+  --primary-foreground: #1c201c;
+  --secondary: #86bd16;
+  --secondary-foreground: #1c201c;
+  /*
+   * Derived so that --muted-foreground clears AA on both surfaces:
+   * muted-vs-sage is 1.173 (a visible but restrained step), and
+   * #283020 measures 5.34:1 on sage and 4.55:1 on muted.
+   */
+  --muted: #849c72;
+  --muted-foreground: #283020;
+  --accent: #ed591a;
+  --accent-foreground: #1c201c;
+  --destructive: #5f1d07;
+  --destructive-foreground: #ecefe6;
+  --border: color-mix(in oklab, var(--foreground) 25%, transparent);
+  --input: color-mix(in oklab, var(--foreground) 25%, transparent);
+  --ring: #1c201c;
 
-  --font-display: var(--font-display, 'Arial Black', sans-serif);
-  --font-condensed: 'Arial Narrow', 'Helvetica Condensed', sans-serif;
-  --font-mono: 'SF Mono', 'Courier New', 'IBM Plex Mono', monospace;
-  --font-sans: 'Helvetica Neue', 'Inter', 'Arial', sans-serif;
-  --font-tech: 'Roboto', 'Open Sans', 'Source Sans Pro', sans-serif;
+  /* Brutalist geometry: zero radius, everywhere. */
+  --radius: 0rem;
+}
+
+.dark {
+  --background: #141610; /* near-black variant — design2.md §2 */
+  --foreground: #ecefe6;
+  --card: #141610;
+  --card-foreground: #ecefe6;
+  --popover: #141610;
+  --popover-foreground: #ecefe6;
+  --primary: #e4511c;
+  --primary-foreground: #141610;
+  --secondary: #86bd16;
+  --secondary-foreground: #141610;
+  --muted: #1b1e16;
+  --muted-foreground: #9ea278;
+  --accent: #e4511c;
+  --accent-foreground: #141610;
+  --destructive: #e4511c;
+  --destructive-foreground: #141610;
+  --border: color-mix(in oklab, var(--foreground) 20%, transparent);
+  --input: color-mix(in oklab, var(--foreground) 20%, transparent);
+  --ring: #ecefe6;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-russo-one);
+  --font-heading: var(--font-russo-one);
+  --font-mono: var(--font-space-mono);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* Poster grain texture */
@@ -131,19 +119,9 @@
 .playback-arrows {
   font-family: var(--font-mono);
   letter-spacing: 0.05em;
-  color: var(--c-text);
-  opacity: 0.4;
+  color: var(--foreground);
+  opacity: 0.7;
   user-select: none;
-}
-
-/* Monospace utility */
-.font-mono-display {
-  font-family: var(--font-mono);
-}
-
-/* Condensed display */
-.font-condensed-display {
-  font-family: var(--font-condensed);
 }
 
 /* Print-style divider */
@@ -155,8 +133,8 @@
   font-size: 0.65rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--c-text);
-  opacity: 0.5;
+  color: var(--foreground);
+  opacity: 0.7;
   padding: 0.5rem 0;
   margin: 0;
 }
@@ -168,25 +146,38 @@
   background: currentColor;
 }
 
-/* Button press feedback */
-@utility btn {
-  @apply uppercase tracking-widest font-mono;
-  transition: transform 160ms var(--ease-out);
-}
-@utility btn {
-  &:active {
-    transform: scale(0.97);
+/*
+ * Slow decorative rotation for the hero disc.
+ *
+ * This previously referenced a `spin-slow` class with no @keyframes anywhere in
+ * the project, so the disc never actually rotated and the reduced-motion
+ * override below guarded nothing. Constant rotation takes `linear` timing.
+ */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* Reduced motion: stop the button press transform and every decorative loop */
+.spin-slow {
+  animation: spin-slow 24s linear infinite;
+}
+
+/*
+ * Hover affordances are gated on a real pointer. Touch devices fire :hover on
+ * tap, which leaves a false hover state stuck after the finger lifts.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift:hover {
+    background-color: var(--muted);
+  }
+}
+
+/*
+ * Reduced motion: strip transform-based movement, keep opacity and colour
+ * transitions that aid comprehension.
+ */
 @media (prefers-reduced-motion: reduce) {
-  .btn,
-  .btn:active {
-    transition: none;
-    transform: none;
-  }
-
   .spin-slow {
     animation: none;
   }

@@ -4,23 +4,27 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import './globals.css';
 
+// These variable names must NOT collide with the `--font-*` names that
+// globals.css's `@theme inline` block maps them into. A self-reference such as
+// `--font-sans: var(--font-sans)` is invalid and silently drops the whole
+// stack, so the next/font names are kept distinct.
 const russoOne = Russo_One({
   weight: ['400'],
   subsets: ['latin'],
-  variable: '--font-display',
+  variable: '--font-russo-one',
   display: 'swap',
 });
 
 const spaceMono = Space_Mono({
   subsets: ['latin'],
   weight: ['400', '700'],
-  variable: '--font-mono',
+  variable: '--font-space-mono',
   display: 'swap',
 });
 
 const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-sans',
+  variable: '--font-inter',
   display: 'swap',
 });
 
@@ -46,7 +50,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${russoOne.variable} ${spaceMono.variable} ${inter.variable}`}
-      // No data-theme here: ThemeController sets it after mount, so the
+      // No class here: ThemeController sets `.dark` after mount, so the
       // server render stays deterministic.
       suppressHydrationWarning
     >
