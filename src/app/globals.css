@@ -50,8 +50,12 @@
   --input: color-mix(in oklab, var(--foreground) 25%, transparent);
   --ring: #1c201c;
 
-  /* Brutalist geometry: zero radius, everywhere. */
-  --radius: 0rem;
+  /*
+   * Restrained rounding rather than the previous 0rem. Fully square corners
+   * read as a grid of boxes; a small radius keeps the technical feel without
+   * every surface looking like a bordered cell.
+   */
+  --radius: 0.5rem;
 }
 
 .dark {
@@ -108,65 +112,8 @@
   --radius-xl: calc(var(--radius) * 1.4);
 }
 
-/* Poster grain texture */
+/* Subtle paper grain. One layer, on body only — nesting it stacks into
+   visible mottling rather than reading as texture. */
 .paper-grain {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-}
-
-/* Playback arrows utility */
-.playback-arrows {
-  font-family: var(--font-mono);
-  letter-spacing: 0.05em;
-  color: var(--foreground);
-  opacity: 0.7;
-  user-select: none;
-}
-
-/* Print-style divider */
-.tech-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--foreground);
-  opacity: 0.7;
-  padding: 0.5rem 0;
-  margin: 0;
-}
-.tech-divider::before,
-.tech-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: currentColor;
-}
-
-/*
- * Slow decorative rotation for the hero disc.
- *
- * This previously referenced a `spin-slow` class with no @keyframes anywhere in
- * the project, so the disc never actually rotated and the reduced-motion
- * override below guarded nothing. Constant rotation takes `linear` timing.
- */
-@keyframes spin-slow {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.spin-slow {
-  animation: spin-slow 24s linear infinite;
-}
-
-/*
- * Reduced motion: strip transform-based movement, keep opacity and colour
- * transitions that aid comprehension.
- */
-@media (prefers-reduced-motion: reduce) {
-  .spin-slow {
-    animation: none;
-  }
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }

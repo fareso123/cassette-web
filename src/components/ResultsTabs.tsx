@@ -83,11 +83,11 @@ function ResultGrid({
         {Array.from({ length: SKELETON_COUNT }, (_, i) => (
           <div
             key={i}
-            className="border-border bg-card flex h-44 flex-col gap-3 border p-4"
+            className="bg-card flex h-40 flex-col gap-3 rounded-xl p-4"
           >
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-1/2" />
-            <Skeleton className="mt-auto h-8 w-full" />
+            <Skeleton className="h-4 w-3/4 rounded" />
+            <Skeleton className="h-3 w-1/2 rounded" />
+            <Skeleton className="mt-auto h-9 w-full rounded-md" />
           </div>
         ))}
       </div>
@@ -119,21 +119,18 @@ export function ResultsTabs({
 
   return (
     <div className="font-mono">
-      <Tabs defaultValue="all" className="gap-0">
-        <TabsList
-          variant="line"
-          className="border-border w-full justify-stretch border-b p-0"
-        >
+      <Tabs defaultValue="all" className="gap-3">
+        <TabsList variant="line" className="w-full justify-stretch gap-1">
           {tabs.map(tab => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="border-border text-muted-foreground hover:text-foreground flex-1 border-r px-4 py-3 text-[10px] tracking-widest last:border-r-0 data-active:border-foreground data-active:text-foreground data-active:after:hidden"
+              className="text-muted-foreground hover:text-foreground flex-1 gap-2 rounded-md px-3 py-1.5 text-sm data-active:text-foreground"
             >
               <span>{tab.label}</span>
               <Badge
                 variant="secondary"
-                className="ml-2 h-5 min-w-5 justify-center px-1 text-[9px] tabular-nums"
+                className="h-5 min-w-5 justify-center px-1.5 text-[10px] tabular-nums"
               >
                 {tab.results.length}
               </Badge>
@@ -142,7 +139,7 @@ export function ResultsTabs({
         </TabsList>
 
         {tabs.map(tab => (
-          <TabsContent key={tab.value} value={tab.value} className="p-4">
+          <TabsContent key={tab.value} value={tab.value}>
             {!loading && tab.results.length === 0 ? (
               <Empty className="py-12">
                 <EmptyHeader>

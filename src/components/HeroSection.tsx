@@ -1,67 +1,42 @@
 'use client';
 
-import { Music, Disc } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export function HeroSection() {
   return (
-    <section
-      className="relative overflow-hidden py-16 font-mono md:py-24"
-      aria-labelledby="hero-heading"
-    >
-      <div className="container relative z-10 mx-auto px-4">
-        <div className="text-center">
-          {/* Sub header */}
-          <div className="text-muted-foreground mb-6 text-[10px] tracking-[0.3em]">
-            ◄◄&nbsp;&nbsp;Search across every source&nbsp;&nbsp;►►
-          </div>
+    <section className="px-4 pt-14 pb-8 md:pt-20" aria-labelledby="hero-heading">
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 text-center">
+        {/* The single h1 on the page. No wordmark or logo art: branding is
+            being designed separately. */}
+        <h1
+          id="hero-heading"
+          className="font-display text-4xl leading-tight font-bold text-balance sm:text-5xl"
+        >
+          Find the music
+        </h1>
 
-          {/* Main logo */}
-          <div className="relative mb-6 inline-flex flex-col items-center">
-            {/* Decorative loop; stops under prefers-reduced-motion */}
-            <Disc
-              className="spin-slow text-primary/10 absolute size-48 motion-reduce:animate-none"
-              aria-hidden="true"
-            />
-            <Music
-              className="text-primary relative z-10 mb-3 size-12"
-              aria-hidden="true"
-            />
-            <h1
-              id="hero-heading"
-              className="font-display text-5xl leading-none font-black tracking-tighter text-balance sm:text-7xl md:text-9xl"
-            >
-              <span translate="no">COUNDEX</span>
-            </h1>
-          </div>
+        <p className="text-muted-foreground max-w-md text-pretty text-sm leading-relaxed sm:text-base">
+          Search a song by name, or paste a YouTube link to resolve it to audio.
+        </p>
 
-          {/* Tagline */}
-          <p className="text-muted-foreground mb-10 text-pretty text-sm tracking-[0.25em]">
-            Music search engine
-          </p>
-
-          {/* Source badges */}
-          <ul className="mb-2 flex list-none flex-wrap items-center justify-center gap-2 p-0">
-            {[
-              { label: 'YouTube', color: 'bg-primary' },
-              { label: 'Torrents', color: 'bg-secondary' },
-              { label: 'MP3 Sites', color: 'bg-accent' },
-            ].map(source => (
-              <li key={source.label}>
-                <Badge
-                  variant="outline"
-                  className="text-muted-foreground gap-2 px-3 py-1.5 text-[10px] tracking-[0.2em]"
-                >
-                  <span
-                    className={`${source.color} inline-block size-1.5`}
-                    aria-hidden="true"
-                  />
-                  <span translate="no">{source.label}</span>
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* What it searches. */}
+        <ul className="flex list-none flex-wrap items-center justify-center gap-2 p-0">
+          {[
+            { label: 'YouTube', color: 'bg-primary' },
+            { label: 'Torrents', color: 'bg-secondary' },
+            { label: 'MP3 sites', color: 'bg-accent' },
+          ].map(source => (
+            <li key={source.label}>
+              <Badge variant="secondary" className="gap-2 font-normal">
+                <span
+                  className={`${source.color} size-1.5 rounded-full`}
+                  aria-hidden="true"
+                />
+                <span translate="no">{source.label}</span>
+              </Badge>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

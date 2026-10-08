@@ -118,96 +118,98 @@ export default function Home() {
 
       {/* Search section */}
       <section
-        className="border-border bg-background font-mono border-y"
+        className="mx-auto w-full max-w-2xl px-4 pb-10"
         aria-labelledby="search-heading"
       >
-        <div className="text-muted-foreground flex items-center gap-3 px-6 py-2 text-[10px] tracking-[0.2em]">
-          <span id="search-heading">Search module</span>
-          <span className="opacity-40">·</span>
-          <span>HF-S 800</span>
-          {/* Reflects whether the response carried a valid session */}
-          <span className="ml-auto">{authenticated ? 'Signed in' : 'Guest'}</span>
-        </div>
+        <h2 id="search-heading" className="sr-only">
+          Search
+        </h2>
 
-        <div className="container mx-auto px-4 py-8">
-          <div className="mx-auto max-w-2xl">
-            <SearchBar
-              query={query}
-              type={type}
-              loading={loading}
-              onQueryChange={setQuery}
-              onTypeChange={setType}
-              onSubmit={handleSubmit}
-            />
+        {/* Reflects whether the response carried a valid session. */}
+        <p className="text-muted-foreground mb-3 text-xs">
+          {authenticated ? 'Signed in' : 'Not signed in'}
+        </p>
 
-            {/* Errors inline, with the status announced */}
-            {error ? (
-              <Alert
-                variant="destructive"
-                role="alert"
-                aria-live="polite"
-                className="mt-3"
+        <div>
+          <SearchBar
+            query={query}
+            type={type}
+            loading={loading}
+            onQueryChange={setQuery}
+            onTypeChange={setType}
+            onSubmit={handleSubmit}
+          />
+
+          {/* Errors inline, with the status announced */}
+          {error ? (
+            <Alert
+              variant="destructive"
+              role="alert"
+              aria-live="polite"
+              className="mt-3"
+            >
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+
+          {/* Recent searches */}
+          {recentSearches.length > 0 && (
+            <nav className="mt-8" aria-labelledby="recent-heading">
+              <h3
+                id="recent-heading"
+                className="text-muted-foreground mb-2 text-xs font-medium"
               >
-                <AlertDescription className="text-[0.7rem] tracking-widest">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            ) : null}
-
-            {/* Recent searches */}
-            {recentSearches.length > 0 && (
-              <nav className="mt-6" aria-labelledby="recent-heading">
-                <div className="text-muted-foreground mb-3 flex items-center gap-3 text-[10px] tracking-[0.2em]">
-                  <span id="recent-heading">Recent searches</span>
-                  <span className="h-px flex-1 bg-current opacity-20" />
-                  <span className="tabular-nums">
-                    {recentSearches.length} entries
-                  </span>
-                </div>
-                <ul className="list-none space-y-1 p-0">
-                  {recentSearches.map(search => (
-                    <li key={search.query}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setQuery(search.query);
-                          setType(search.type);
-                          setError(null);
-                        }}
-                        className="hover:bg-muted focus-visible:ring-ring flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-xs tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
-                      >
-                        <span className="min-w-0 truncate">{search.query}</span>
-                        <span className="text-muted-foreground shrink-0">
-                          {search.type === 'url' ? 'YouTube' : 'Song'} ·{' '}
-                          <time dateTime={search.timestamp}>
-                            {dateFormatter.format(new Date(search.timestamp))}
-                          </time>
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
-          </div>
+                Recent searches
+              </h3>
+              <ul className="flex list-none flex-col gap-1 p-0">
+                {recentSearches.map(search => (
+                  <li key={search.query}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setQuery(search.query);
+                        setType(search.type);
+                        setError(null);
+                      }}
+                      className="hover:bg-muted focus-visible:ring-ring flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+                    >
+                      <span className="min-w-0 truncate">{search.query}</span>
+                      <span className="text-muted-foreground shrink-0 text-xs">
+                        {search.type === 'url' ? 'YouTube' : 'Song'} ·{' '}
+                        <time dateTime={search.timestamp}>
+                          {dateFormatter.format(new Date(search.timestamp))}
+                        </time>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
         </div>
       </section>
 
       {/* Results section */}
       <section
-        className="border-border bg-background font-mono border-t"
+        className="mx-auto w-full max-w-4xl px-4 pb-12"
         aria-labelledby="results-heading"
       >
-        <div className="text-muted-foreground flex items-center gap-3 px-6 py-2 text-[10px] tracking-[0.2em]">
-          <span id="results-heading">Results</span>
-          <span className="opacity-40">·</span>
+        <div className="mb-3 flex items-baseline gap-2">
+          <h2 id="results-heading" className="text-sm font-medium">
+            Results
+          </h2>
           {/* Status region: announces "N results" as searches complete */}
-          <p role="status" aria-live="polite" className="tabular-nums">
+          <p
+            role="status"
+            aria-live="polite"
+            className="text-muted-foreground text-xs tabular-nums"
+          >
             {loading
               ? 'Searching…'
               : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
           </p>
         </div>
+
         <ResultsTabs
           results={results}
           ytDlpResults={ytDlpResults}

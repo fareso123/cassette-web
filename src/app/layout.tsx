@@ -30,7 +30,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'COUNDEX · Music Player',
+  title: 'Music Player',
   description: 'Search songs and find links across YouTube, torrents, and more.',
   icons: {
     icon: [

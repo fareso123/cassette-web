@@ -4,49 +4,21 @@ import { ThemeController } from './ThemeController';
 
 export function Navbar() {
   return (
-    <nav aria-label="Main" className="border-border bg-background font-mono border-b">
-      {/* Top thin strip */}
-      <div className="text-muted-foreground flex items-center justify-between px-6 py-1 text-[10px] tracking-[0.2em]">
-        <div className="flex items-center gap-4">
-          <span translate="no">MUSIC PLAYER</span>
-          <span className="opacity-50">·</span>
-          <span>RECORD START</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="hidden sm:inline">TYPE 1 NORMAL POSITION</span>
-          <ThemeController />
-        </div>
-      </div>
-
-      {/* Main nav bar. No logo mark yet — one is being designed. */}
-      <div className="flex items-center justify-between px-6 py-3">
-        <div className="flex items-center gap-2">
-          <span
-            className="text-muted-foreground border-border flex size-9 items-center justify-center border border-dashed text-[10px]"
-            aria-hidden="true"
-          >
-            LOGO
-          </span>
+    <nav aria-label="Main" className="border-border bg-background/80 border-b backdrop-blur-sm">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
+        {/*
+          Logo slot, empty pending design. Kept as a fixed-size box so the
+          header does not reflow when the real mark lands, and kept out of the
+          accessibility tree because it is not yet meaningful.
+        */}
+        <div
+          className="border-border text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-md border border-dashed text-[9px] tracking-widest"
+          aria-hidden="true"
+        >
+          LOGO
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground mr-2 hidden text-[10px] tracking-[0.15em] md:inline">
-            LOUNDEX
-          </span>
-        </div>
-      </div>
-
-      {/* Decorative divider line with playback arrows */}
-      <div className="flex items-center gap-3 px-6 pb-1">
-        <span className="playback-arrows select-none" aria-hidden="true">
-          ◄◄
-        </span>
-        <span className="tech-divider flex-1 py-0 opacity-100">
-          Search · Resolve · Download
-        </span>
-        <span className="playback-arrows select-none" aria-hidden="true">
-          ►►
-        </span>
+        <ThemeController />
       </div>
     </nav>
   );

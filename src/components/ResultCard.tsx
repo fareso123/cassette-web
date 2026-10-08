@@ -33,10 +33,10 @@ export function ResultCard({
   duration,
 }: ResultCardProps) {
   return (
-    <Card className="border-border bg-card ring-0 group border py-0 transition-colors hover:bg-muted">
+    <Card className="bg-card group overflow-hidden py-0 transition-shadow hover:shadow-md">
       {/* Thumbnail strip */}
       {thumbnail ? (
-        <div className="border-border relative h-32 shrink-0 overflow-hidden border-b">
+        <div className="relative h-40 shrink-0 overflow-hidden">
           {/*
             Deliberately a plain <img>, not next/image. Thumbnails come from
             whatever host the yt-dlp extractor or scraper returns, so
@@ -58,7 +58,7 @@ export function ResultCard({
           />
           {/* Duration overlay */}
           {duration ? (
-            <div className="bg-foreground text-background absolute right-2 bottom-2 flex items-center gap-1 px-2 py-0.5 text-[10px] tracking-wider tabular-nums">
+            <div className="bg-background/85 text-foreground absolute right-2 bottom-2 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] tabular-nums backdrop-blur-sm">
               <Clock className="size-3" aria-hidden="true" />
               <span className="sr-only">Duration </span>
               {formatDuration(duration)}
@@ -68,14 +68,14 @@ export function ResultCard({
       ) : null}
 
       <CardHeader className="gap-0 px-4 pt-4">
-        <CardTitle className="font-mono text-sm leading-tight font-bold tracking-wide break-words line-clamp-2">
+        <CardTitle className="line-clamp-2 text-sm leading-snug font-semibold break-words">
           {title}
         </CardTitle>
       </CardHeader>
 
       <CardContent className="px-4 pb-4">
         {/* Meta row */}
-        <div className="text-muted-foreground mt-1 mb-3 flex min-w-0 items-center gap-2 text-[10px] tracking-widest">
+        <div className="text-muted-foreground mt-1.5 mb-3 flex min-w-0 items-center gap-1.5 text-xs">
           {artist ? <span className="truncate">{artist}</span> : null}
           {source ? (
             <>
@@ -95,7 +95,7 @@ export function ResultCard({
         </div>
       </CardContent>
 
-      <CardFooter className="border-border mt-auto border-t bg-transparent p-4 pt-0">
+      <CardFooter className="mt-auto border-t bg-transparent p-4 pt-0">
         {downloadUrl ? (
           <Button
             render={
@@ -108,8 +108,8 @@ export function ResultCard({
             // Base UI assumes a <button> host by default and warns when the
             // rendered element is not one. This is deliberately a link.
             nativeButton={false}
-            variant="default"
-            className="w-full gap-2"
+            variant="secondary"
+            className="w-full gap-2 rounded-md"
           >
             <Download data-icon="inline-start" aria-hidden="true" />
             Download
@@ -119,7 +119,7 @@ export function ResultCard({
             {/* Visible text, not a disabled control: a disabled button is
                 unfocusable, so the message would be invisible to keyboard
                 and screen-reader users. */}
-            <p className="text-muted-foreground border-border w-full border px-3 py-2 text-center text-[0.65rem] tracking-widest">
+            <p className="text-muted-foreground bg-muted w-full rounded-md px-3 py-2 text-center text-xs">
               No download available
             </p>
           </>
