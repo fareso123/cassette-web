@@ -100,9 +100,14 @@ export function ResultCard({
           <Button
             render={
               // An anchor, not a button: this opens a cross-origin download in
-              // a new tab, which is a navigation, not an in-page action.
+              // a new tab, which is a navigation, not an in-page action. A real
+              // <button> would break middle-click, copy-link and the browser's
+              // link preview in the status bar.
               <a href={downloadUrl} target="_blank" rel="noopener noreferrer" />
             }
+            // Base UI assumes a <button> host by default and warns when the
+            // rendered element is not one. This is deliberately a link.
+            nativeButton={false}
             variant="default"
             className="w-full gap-2"
           >

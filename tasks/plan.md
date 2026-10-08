@@ -46,41 +46,41 @@ Full specification: `SPEC-shadcn-migration.md`.
 
 ### Phase 1: Foundation
 
-- [ ] Task 1: Dissolve `src/lib/utils/`, add `cn()`
-- [ ] Task 2: Capture baseline screenshots
-- [ ] Task 3: shadcn `init` (Base UI, nova preset)
-- [ ] Task 4: Atomic token swap — remove daisyUI, author the two-theme token block
+- [x] Task 1: Dissolve `src/lib/utils/`, add `cn()`
+- [x] Task 2: Capture baseline screenshots
+- [x] Task 3: shadcn `init` (Base UI, nova preset)
+- [x] Task 4: Atomic token swap — remove daisyUI, author the two-theme token block
 
 ### Checkpoint: Foundation
 
-- [ ] `npm run build` clean, contrast test green, `git grep -I daisyui` empty
+- [x] `npm run build` clean, contrast test green, `git grep -I daisyui` empty
 
 ### Phase 2: Components
 
-- [ ] Task 5: Add the 12 shadcn components
-- [ ] Task 6: Keyboard-verify Base UI `Tabs` + `ToggleGroup`
-- [ ] Task 7: Rewire `ThemeController`
-- [ ] Task 8: Rewire `SearchBar`
-- [ ] Task 9: Rewire `ResultsTabs`
-- [ ] Task 10: Rewire `ResultCard`
-- [ ] Task 11: Rewire `HeroSection`
-- [ ] Task 12: Rewire `Navbar` + `Footer`
+- [x] Task 5: Add the 12 shadcn components
+- [x] Task 6: Keyboard-verify Base UI `Tabs` + `ToggleGroup`
+- [x] Task 7: Rewire `ThemeController`
+- [x] Task 8: Rewire `SearchBar`
+- [x] Task 9: Rewire `ResultsTabs`
+- [x] Task 10: Rewire `ResultCard`
+- [x] Task 11: Rewire `HeroSection`
+- [x] Task 12: Rewire `Navbar` + `Footer`
 
 ### Checkpoint: Components
 
-- [ ] Each file committed separately, lint + build green after each
+- [x] Each file committed separately, lint + build green after each
 
 ### Phase 3: Shell + verification
 
-- [ ] Task 13: Rewire `page.tsx` (Alert, Skeleton, recent searches)
-- [ ] Task 14: Rewire `layout.tsx` (font vars, skip link, grain)
-- [ ] Task 15: Add `no-daisyui` and `tokens-contrast` tests
-- [ ] Task 16: Update `AGENTS.md` and `PROJECT_SETUP.md`
-- [ ] Task 17: Verification pass — screenshots, reduced motion, keyboard
+- [x] Task 13: Rewire `page.tsx` (Alert, Skeleton, recent searches)
+- [x] Task 14: Rewire `layout.tsx` (font vars, skip link, grain)
+- [x] Task 15: Add `no-daisyui` and `tokens-contrast` tests
+- [x] Task 16: Update `AGENTS.md` and `PROJECT_SETUP.md`
+- [x] Task 17: Verification pass — screenshots, reduced motion, keyboard
 
 ### Checkpoint: Complete
 
-- [ ] All acceptance criteria met, ready for review
+- [x] All acceptance criteria met, ready for review
 
 ## Risks and Mitigations
 

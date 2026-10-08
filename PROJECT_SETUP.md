@@ -10,7 +10,7 @@ This document describes the setup and implementation of the Cassette Web project
 - **React 19.0.0** ✅ - Compatible with Next.js 15.x
 - **TypeScript** ✅ - Type-safe development
 - **Tailwind CSS 4** ✅ - Modern utility-first CSS framework
-- **DaisyUI 5** ✅ - UI component library for Tailwind CSS 4
+- **shadcn/ui** ✅ - Component source for Tailwind CSS 4, on Base UI primitives
 
 ### Security & Infrastructure
 - **Cloudflare Turnstile** ✅ - Free, unlimited bot protection
@@ -115,9 +115,11 @@ src/
 - Test coverage directories
 
 ### globals.css
-- Tailwind CSS + DaisyUI integration
-- Includes `@import "tailwindcss";` and `@plugin "daisyui";`
-- Provides foundation for component styling
+- Tailwind CSS 4 + shadcn/ui integration
+- Includes `@import "tailwindcss";`, `@import "tw-animate-css";` and
+  `@import "shadcn/tailwind.css";`
+- Declares the `dark` custom variant and the theme token blocks (`:root` and
+  `.dark`) that every component reads
 
 ## Security Implementation
 
@@ -156,10 +158,10 @@ src/
 - **Responsive Design**: Mobile-friendly layout
 
 ### Component Library
-- **DaisyUI Components**: Pre-built UI components
+- **shadcn/ui Components**: Vendored source under `src/components/ui/`
 - **Custom Components**: Project-specific components
 - **Tailwind CSS Utilities**: Fine-grained styling control
-- **Dark Mode Support**: Built into DaisyUI
+- **Dark Mode Support**: A `.dark` class on `<html>`, owned by `ThemeProvider`
 
 ## API Architecture
 

@@ -8,7 +8,7 @@ across music and torrent scrapers.
 
 Key features:
 - Next.js 15 App Router, React 19, TypeScript strict
-- Tailwind CSS 4 + daisyUI 5 with a custom `cassette` design system
+- Tailwind CSS 4 + shadcn/ui on Base UI, with a custom `cassette` design system
 - Modular scraper framework, configured from the database
 - Upstash rate limiting, Cloudflare Turnstile (not yet wired in)
 - PostgreSQL via Drizzle ORM
@@ -22,10 +22,12 @@ src/
 ├── app/
 │   ├── layout.tsx           # Root layout: fonts, Navbar, Footer, skip link
 │   ├── page.tsx             # Search dashboard (client component)
-│   ├── globals.css          # daisyUI themes + design tokens
+│   ├── globals.css          # shadcn theme tokens + design utilities
 │   └── api/search/route.ts  # The only API route
 ├── components/              # SearchBar, ResultsTabs, ResultCard, Navbar,
-│                            # Footer, HeroSection, ThemeController
+│   │                        # Footer, HeroSection, ThemeController,
+│   │                        # ThemeProvider, RootDocument
+│   └── ui/                  # shadcn/ui source components (CLI-managed)
 ├── lib/
 │   ├── env.ts               # Zod-validated env; throws at import if invalid
 │   ├── db/                  # schema.ts (tables), index.ts (drizzle client)
@@ -36,18 +38,21 @@ src/
 │   ├── session.ts           # HMAC tokens, per-session rate limit
 │   ├── search-history.ts    # search_history reads/writes
 │   ├── turnstile.ts         # Not called by any route yet
-│   └── utils/youtube.ts     # YouTube URL parsing
+│   ├── utils.ts             # cn() — re-exports the `cn` package
+│   └── youtube.ts           # YouTube URL parsing
 ├── types/                   # extracted.ts, scraped.ts, search.ts
 ├── middleware.ts            # Edge middleware: security headers only
 └── __tests__/               # bun:test
 
+components.json             # shadcn CLI config (base: base, style: nova)
 drizzle.config.ts           # Drizzle Kit config
 drizzle/                    # Generated migrations
 scripts/seed.ts              # Inserts the default scrapers
+tasks/                       # plan.md + todo.md for the shadcn migration
 ```
 
 Design reference: `design2.md` documents the brutalist/mono design system.
-The themes in `globals.css` implement it.
+The token blocks in `globals.css` implement it.
 
 ## Data Flow
 
@@ -103,7 +108,7 @@ seed, song search returns nothing.
 - **TypeScript**: strict mode, `@/*` → `./src/*`
 - **Testing**: `bun:test` (`import { describe, test, expect } from 'bun:test'`)
 - **Linting**: ESLint 10 flat config (`eslint.config.mjs`)
-- **Styling**: Tailwind CSS 4 + daisyUI 5, no `tailwind.config.js`
+- **Styling**: Tailwind CSS 4 + shadcn/ui, no `tailwind.config.js`
 - **Build**: Next.js 15.5.26
 
 ### ESLint notes
@@ -139,12 +144,16 @@ Behaviour when optional vars are absent:
 
 ## Conventions
 
-- **Components**: `PascalCase`, exported by name (`export function SearchBar`)
+- **Components**: `PascalCase`, exported by name (`export function SearchBar`).
+  shadcn's `src/components/ui/` files keep the CLI's kebab-case naming and are
+  treated as vendored source — edit deliberately, and prefer `shadcn add
+  --diff` before overwriting.
 - **Types**: `PascalCase`; result shapes live in `src/types/`
 - **Files**: one concern per file, kebab or camel matching the directory style
-- **Styling**: daisyUI classes first, Tailwind utilities for the rest.
-  Avoid inline `style={{}}` except for `var(--font-*)` bindings and the
-  gradient strip
+- **Styling**: shadcn primitives first; `className` carries **layout only**, never
+  colour or type overrides. Use semantic tokens (`bg-background`,
+  `text-muted-foreground`), never raw palette values. Avoid inline `style={{}}`
+  except for the footer's gradient strip, which interpolates live token values
 - **Imports**: React → Next → third-party → local → types
 
 ### Two result shapes, one card
@@ -157,10 +166,30 @@ result look un-downloadable.
 
 ### Theming
 
-`cassette` and `cassette-light` are the two registered daisyUI themes.
-`ThemeController` toggles them and syncs `localStorage` through a
-`storage` event. Do not hardcode `data-theme` in `layout.tsx`; React
-overwrites it on re-render.
+`:root` and `.dark` in `globals.css` hold the theme tokens; `@theme inline`
+maps them onto Tailwind's `--color-*` names. Palette values come from
+`design2.md`. Two rules are load-bearing and are enforced by
+`src/__tests__/tokens-contrast.test.ts`:
+
+- `--muted-foreground` is a **solid** colour, never `foreground/50`. On the sage
+  canvas, foreground at 50% alpha composites to `#5A634F` at 2.40:1, which fails
+  AA. Do not reintroduce alpha washes for meaningful text.
+- `--primary-foreground` is near-black `#1c201c`, not white. White on the orange
+  primary is 3.48:1 and fails AA.
+
+`ThemeProvider` owns the `dark` class on `<html>`, and `RootDocument` renders
+`<html>`/`<body>` so that class is React's own output. **Never toggle it
+imperatively** — a client component calling
+`document.documentElement.classList.toggle()` loses to the `className` prop React
+renders for the same node, which is how the previous controller ended up unable
+to switch back to light. `themeInitScript` seeds the class before first paint;
+`suppressHydrationWarning` on `<html>` is what keeps that from being a mismatch.
+
+Font variables are named `--font-inter`, `--font-russo-one` and
+`--font-space-mono` at the next/font layer and mapped to `--font-sans`,
+`--font-display` and `--font-mono` in `@theme inline`. They must stay distinct:
+a self-reference such as `--font-sans: var(--font-sans)` is invalid and silently
+drops the whole stack.
 
 ## Known Gaps
 
@@ -184,11 +213,34 @@ Things that look implemented but are not. Verify before relying on them:
 - **The session rate-limit test logs a Drizzle error.** There is no
   database in the test env, so the query fails and `trackRateLimit` fails
   open. That is the tested behaviour, not a failure, but it looks alarming.
+- **There are no component tests.** `bun test` covers `src/lib`, the API route and
+  the two static gates (`tokens-contrast`, `no-daisyui`), but nothing renders a
+  React component. `ResultCard` and `ResultsTabs` were verified by DOM snapshot
+  against a temporary fixture route, since no reachable database or yt-dlp
+  binary exists locally to drive the real search path. Introducing React Testing
+  Library is still outstanding.
+- **`/api/search` returns zero results without a database.** With no Postgres the
+  scraper registry logs the connection error and returns empty, so song search
+  looks broken rather than unconfigured. `npm run db:push && npm run db:seed`
+  fixes it; scraper selectors are still unverified.
 - **ESLint runs clean** (0 errors, 0 warnings) as of this writing.
 
 ## Where to Start
 
 1. `src/app/api/search/route.ts` — the request path, end to end
-2. `src/lib/scrapers/registry.ts` — how sources are configured and loaded
-3. `src/lib/session.ts` — the auth primitives and their gaps
-4. `src/app/globals.css` — the design tokens every component reads
+2. `src/app/globals.css` — the design tokens every component reads
+3. `src/lib/scrapers/registry.ts` — how sources are configured and loaded
+4. `src/lib/session.ts` — the auth primitives and their gaps
+
+### Adding a shadcn component
+
+```bash
+npx shadcn@latest add <component>          # add
+npx shadcn@latest add <component> --dry-run  # preview first
+npx shadcn@latest add <component> --diff <file>  # see upstream vs local
+```
+
+The CLI rewrites `src/lib/utils.ts` and imports `cn` from the bare `cn` package.
+Point new imports at `@/lib/utils` instead, and run `npm run build` plus
+`bun test` afterwards — `no-daisyui.test.ts` fails if a generated file smuggles a
+daisyUI class back in.

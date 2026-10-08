@@ -81,13 +81,13 @@ Base UI primitives, and scaffold the token block. Must run *before* Task 4 becau
 `init` rewrites `globals.css`.
 
 **Acceptance criteria:**
-- [ ] `components.json` exists with `base: "base"`, `style: "nova"`,
+- [x] `components.json` exists with `base: "base"`, `style: "nova"`,
       `aliases.utils: "@/lib/utils"`
-- [ ] `cva` and the Base UI package are in `package.json`
+- [x] `cva` and the Base UI package are in `package.json`
 
 **Verification:**
-- [ ] `npm run build` succeeds
-- [ ] `npx shadcn@latest info` reports the expected base and style
+- [x] `npm run build` succeeds
+- [x] `npx shadcn@latest info` reports the expected base and style
 
 **Dependencies:** Task 1
 
@@ -103,21 +103,21 @@ the missing `spin-slow` keyframes, delete dead utilities, relocate press feedbac
 gate hover behind a pointer-type media query.
 
 **Acceptance criteria:**
-- [ ] No `@plugin "daisyui"` remains; `daisyui` gone from `package.json`
-- [ ] `:root` carries the sage tokens, `.dark` the near-black tokens
-- [ ] `--muted-foreground` is a solid color in both themes, never `foreground/50`
-- [ ] `primary-foreground` is near-black, not white
-- [ ] Font vars renamed to `--font-inter` / `--font-russo-one` / `--font-space-mono`
-- [ ] `@keyframes spin-slow` exists; `prefers-reduced-motion` still stops it
-- [ ] `.paper-grain`, `.tech-divider`, `.playback-arrows` survive
-- [ ] `.font-mono-display`, `.font-condensed-display`, `@utility btn`, and the unused
+- [x] No `@plugin "daisyui"` remains; `daisyui` gone from `package.json`
+- [x] `:root` carries the sage tokens, `.dark` the near-black tokens
+- [x] `--muted-foreground` is a solid color in both themes, never `foreground/50`
+- [x] `primary-foreground` is near-black, not white
+- [x] Font vars renamed to `--font-inter` / `--font-russo-one` / `--font-space-mono`
+- [x] `@keyframes spin-slow` exists; `prefers-reduced-motion` still stops it
+- [x] `.paper-grain`, `.tech-divider`, `.playback-arrows` survive
+- [x] `.font-mono-display`, `.font-condensed-display`, `@utility btn`, and the unused
       `--ease-in-out` / `--ease-drawer` tokens are deleted
-- [ ] `@media (hover: hover) and (pointer: fine)` guards hover transforms
+- [x] `@media (hover: hover) and (pointer: fine)` guards hover transforms
 
 **Verification:**
-- [ ] `npm run build` clean
-- [ ] `git grep -I daisyui` returns nothing outside lockfile history
-- [ ] `bun test src/__tests__/tokens-contrast.test.ts` passes
+- [x] `npm run build` clean
+- [x] `git grep -I daisyui` returns nothing outside lockfile history
+- [x] `bun test src/__tests__/tokens-contrast.test.ts` passes
 
 **Dependencies:** Task 3
 
@@ -131,12 +131,12 @@ gate hover behind a pointer-type media query.
 spinner alert separator`
 
 **Acceptance criteria:**
-- [ ] All 12 files present under `src/components/ui/`
-- [ ] `Spinner` imported where the old `Loader2` was used
-- [ ] Every added file reviewed for missing sub-components and hardcoded import paths
+- [x] All 12 files present under `src/components/ui/`
+- [x] `Spinner` imported where the old `Loader2` was used
+- [x] Every added file reviewed for missing sub-components and hardcoded import paths
 
 **Verification:**
-- [ ] `npm run build` clean
+- [x] `npm run build` clean
 
 **Dependencies:** Task 4
 
@@ -151,12 +151,12 @@ roving-focus behaviour differs from the hand-rolled handler in `ResultsTabs`, fa
 to `--base radix` now while it is still a one-flag change.
 
 **Acceptance criteria:**
-- [ ] Arrow keys, Home, End, and Tab all behave as expected in `Tabs`
-- [ ] `ToggleGroup` moves as a single tab stop
-- [ ] Decision recorded in the commit message
+- [x] Arrow keys, Home, End, and Tab all behave as expected in `Tabs`
+- [x] `ToggleGroup` moves as a single tab stop
+- [x] Decision recorded in the commit message
 
 **Verification:**
-- [ ] Manual keyboard pass in the browser
+- [x] Manual keyboard pass in the browser
 
 **Dependencies:** Task 5
 
@@ -170,13 +170,13 @@ to `--base radix` now while it is still a one-flag change.
 and switch `data-theme` to the `.dark` class.
 
 **Acceptance criteria:**
-- [ ] Uses shadcn `Button` with `variant="ghost"`
-- [ ] Toggles `.dark` on `<html>`; `useSyncExternalStore` hydration contract preserved
-- [ ] Zero `btn-*` classes remain
+- [x] Uses shadcn `Button` with `variant="ghost"`
+- [x] Toggles `.dark` on `<html>`; `useSyncExternalStore` hydration contract preserved
+- [x] Zero `btn-*` classes remain
 
 **Verification:**
-- [ ] `npm run lint` and `npm run build` clean
-- [ ] Toggle round-trips and survives reload
+- [x] `npm run lint` and `npm run build` clean
+- [x] Toggle round-trips and survives reload
 
 **Dependencies:** Task 6
 
@@ -193,15 +193,15 @@ native constraint validation and shows a browser bubble instead of the app's err
 surface.
 
 **Acceptance criteria:**
-- [ ] `ToggleGroup` replaces the `role="group"` + `aria-pressed` pair
-- [ ] `InputGroup` + `InputGroupInput` + `InputGroupAddon` compose the field
-- [ ] `type="search"` always, `inputMode` varies by mode
-- [ ] Loading state uses `Spinner` with `data-icon`
-- [ ] No manual template-literal ternaries — `cn()` only
+- [x] `ToggleGroup` replaces the `role="group"` + `aria-pressed` pair
+- [x] `InputGroup` + `InputGroupInput` + `InputGroupAddon` compose the field
+- [x] `type="search"` always, `inputMode` varies by mode
+- [x] Loading state uses `Spinner` with `data-icon`
+- [x] No manual template-literal ternaries — `cn()` only
 
 **Verification:**
-- [ ] `npm run lint` and `npm run build` clean
-- [ ] Submit works in both modes; invalid URL surfaces through the app's error region
+- [x] `npm run lint` and `npm run build` clean
+- [x] Submit works in both modes; invalid URL surfaces through the app's error region
 
 **Dependencies:** Task 7
 
@@ -216,14 +216,14 @@ surface.
 must survive intact — it exists to fix a real bug.
 
 **Acceptance criteria:**
-- [ ] `Tabs` / `TabsList` / `TabsTrigger` / `TabsContent` used
-- [ ] No `role="tablist"` markup remains
-- [ ] `toCard()` and `resultKey()` unchanged
-- [ ] Empty state uses `Empty`; tab counts use `Badge`
+- [x] `Tabs` / `TabsList` / `TabsTrigger` / `TabsContent` used
+- [x] No `role="tablist"` markup remains
+- [x] `toCard()` and `resultKey()` unchanged
+- [x] Empty state uses `Empty`; tab counts use `Badge`
 
 **Verification:**
-- [ ] `npm run lint` and `npm run build` clean
-- [ ] Keyboard traversal verified against Task 6 baseline
+- [x] `npm run lint` and `npm run build` clean
+- [x] Keyboard traversal verified against Task 6 baseline
 
 **Dependencies:** Task 8
 
@@ -238,14 +238,14 @@ semantics *and* the press feedback that `@utility btn` used to supply. Keeps the
 `<img>` with its documented rationale.
 
 **Acceptance criteria:**
-- [ ] Full `CardHeader` / `CardContent` / `CardFooter` composition
-- [ ] Press feedback present (`active:scale-[0.97]`)
-- [ ] Duration overlay stays legible on the sage canvas
-- [ ] `<img>` and its explanatory comment preserved verbatim
-- [ ] "No download available" remains visible text, not a disabled control
+- [x] Full `CardHeader` / `CardContent` / `CardFooter` composition
+- [x] Press feedback present (`active:scale-[0.97]`)
+- [x] Duration overlay stays legible on the sage canvas
+- [x] `<img>` and its explanatory comment preserved verbatim
+- [x] "No download available" remains visible text, not a disabled control
 
 **Verification:**
-- [ ] `npm run lint` and `npm run build` clean
+- [x] `npm run lint` and `npm run build` clean
 
 **Dependencies:** Task 9
 
@@ -259,13 +259,13 @@ semantics *and* the press feedback that `@utility btn` used to supply. Keeps the
 token-driven classes and repair the rotating `Disc`.
 
 **Acceptance criteria:**
-- [ ] `Badge` for the three source chips
-- [ ] No inline `color:` / `fontFamily:` style objects — tokens only
-- [ ] `spin-slow` actually rotates and stops under reduced motion
+- [x] `Badge` for the three source chips
+- [x] No inline `color:` / `fontFamily:` style objects — tokens only
+- [x] `spin-slow` actually rotates and stops under reduced motion
 
 **Verification:**
-- [ ] `npm run lint` and `npm run build` clean
-- [ ] Disc rotates; static under `prefers-reduced-motion`
+- [x] `npm run lint` and `npm run build` clean
+- [x] Disc rotates; static under `prefers-reduced-motion`
 
 **Dependencies:** Task 10
 
@@ -280,13 +280,13 @@ footer gradient and `tech-divider` survive as bespoke classes; `grain` is droppe
 nested elements so it no longer stacks four layers deep.
 
 **Acceptance criteria:**
-- [ ] Zero daisyUI color tokens in either file
-- [ ] `paper-grain` applied to `body` only
-- [ ] `tech-divider` and `playback-arrows` still render
-- [ ] Footer gradient sourced from tokens, not `--c-*` aliases
+- [x] Zero daisyUI color tokens in either file
+- [x] `paper-grain` applied to `body` only
+- [x] `tech-divider` and `playback-arrows` still render
+- [x] Footer gradient sourced from tokens, not `--c-*` aliases
 
 **Verification:**
-- [ ] `npm run lint` and `npm run build` clean
+- [x] `npm run lint` and `npm run build` clean
 
 **Dependencies:** Task 11
 
@@ -301,14 +301,14 @@ shows structure instead of a bare "Searching…" string. Recent-searches rows ge
 consistent focus and hover treatment.
 
 **Acceptance criteria:**
-- [ ] `Alert` with a live region for errors
-- [ ] `Skeleton` cards render while `loading`
-- [ ] `role="status"` announcement preserved
-- [ ] Zero daisyUI color tokens
+- [x] `Alert` with a live region for errors
+- [x] `Skeleton` cards render while `loading`
+- [x] `role="status"` announcement preserved
+- [x] Zero daisyUI color tokens
 
 **Verification:**
-- [ ] `npm run lint` and `npm run build` clean
-- [ ] Error and loading states both reachable
+- [x] `npm run lint` and `npm run build` clean
+- [x] Error and loading states both reachable
 
 **Dependencies:** Task 12
 
@@ -322,14 +322,14 @@ consistent focus and hover treatment.
 link tokens, and remove the duplicated grain layer.
 
 **Acceptance criteria:**
-- [ ] Font variables renamed to `--font-inter` / `--font-russo-one` / `--font-space-mono`
-- [ ] Skip link uses `bg-background` / `text-foreground` / `border-border`
-- [ ] No inline `fontFamily` style binding
-- [ ] No `data-theme` attribute introduced
+- [x] Font variables renamed to `--font-inter` / `--font-russo-one` / `--font-space-mono`
+- [x] Skip link uses `bg-background` / `text-foreground` / `border-border`
+- [x] No inline `fontFamily` style binding
+- [x] No `data-theme` attribute introduced
 
 **Verification:**
-- [ ] `npm run lint` and `npm run build` clean
-- [ ] No hydration warning in the console
+- [x] `npm run lint` and `npm run build` clean
+- [x] No hydration warning in the console
 
 **Dependencies:** Task 13
 
@@ -344,14 +344,14 @@ gone; `tokens-contrast` parses `globals.css` and fails any foreground/background
 under 4.5:1.
 
 **Acceptance criteria:**
-- [ ] `no-daisyui` fails if `daisyui` reappears in `package.json` or `globals.css`
-- [ ] `no-daisyui` fails on any daisyUI class token in `src/app` or `src/components`
-- [ ] `tokens-contrast` covers every pair in both themes
-- [ ] Both pass
+- [x] `no-daisyui` fails if `daisyui` reappears in `package.json` or `globals.css`
+- [x] `no-daisyui` fails on any daisyUI class token in `src/app` or `src/components`
+- [x] `tokens-contrast` covers every pair in both themes
+- [x] Both pass
 
 **Verification:**
-- [ ] `npm test` green
-- [ ] Each test verified to fail when its condition is violated
+- [x] `npm test` green
+- [x] Each test verified to fail when its condition is violated
 
 **Dependencies:** Task 14
 
@@ -365,13 +365,13 @@ under 4.5:1.
 styling conventions — all now wrong. `PROJECT_SETUP.md:119` names the daisyUI plugin.
 
 **Acceptance criteria:**
-- [ ] `AGENTS.md` describes shadcn, the token model, `src/components/ui`, and the
+- [x] `AGENTS.md` describes shadcn, the token model, `src/components/ui`, and the
       `utils.ts` convention
-- [ ] `PROJECT_SETUP.md:119` corrected
-- [ ] Known Gaps section still accurate
+- [x] `PROJECT_SETUP.md:119` corrected
+- [x] Known Gaps section still accurate
 
 **Verification:**
-- [ ] `git grep -I daisyui` returns nothing in `*.md`
+- [x] `git grep -I daisyui` returns nothing in `*.md`
 
 **Dependencies:** Task 15
 
@@ -385,15 +385,15 @@ styling conventions — all now wrong. `PROJECT_SETUP.md:119` names the daisyUI 
 deltas appear.
 
 **Acceptance criteria:**
-- [ ] Screenshot deltas limited to sage background, dark theme, skeletons
-- [ ] `npm run lint`, `npm run build`, `npm test` all clean
-- [ ] Every token pair ≥ 4.5:1 in both themes
-- [ ] Keyboard traversal verified end to end
-- [ ] `prefers-reduced-motion` verified
-- [ ] Working tree clean apart from the pre-existing `.env` modifications
+- [x] Screenshot deltas limited to sage background, dark theme, skeletons
+- [x] `npm run lint`, `npm run build`, `npm test` all clean
+- [x] Every token pair ≥ 4.5:1 in both themes
+- [x] Keyboard traversal verified end to end
+- [x] `prefers-reduced-motion` verified
+- [x] Working tree clean apart from the pre-existing `.env` modifications
 
 **Verification:**
-- [ ] Full checklist above
+- [x] Full checklist above
 
 **Dependencies:** Task 16
 

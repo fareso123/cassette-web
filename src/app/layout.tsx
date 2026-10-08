@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Russo_One, Space_Mono, Inter } from 'next/font/google';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
+import { RootDocument } from '@/components/RootDocument';
+import { themeInitScript } from '@/components/ThemeProvider';
 import './globals.css';
 
 // These variable names must NOT collide with the `--font-*` names that
@@ -47,41 +48,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${russoOne.variable} ${spaceMono.variable} ${inter.variable}`}
-      // No class here: ThemeController sets `.dark` after mount, so the
-      // server render stays deterministic.
-      suppressHydrationWarning
-    >
+    <>
       {/*
-        paper-grain lives on body only. It was previously also on the page
-        wrapper, Navbar and Footer, so four 0.04-opacity noise layers stacked
-        into visible mottling rather than reading as a subtle texture.
+        Applies the stored theme before first paint. Without it a returning
+        dark-theme visitor gets a full light flash before hydration.
       */}
-      <body className="paper-grain bg-background text-foreground font-sans transition-colors duration-300 min-h-screen">
-        <a
-          href="#main"
-          className="focus:bg-background focus:text-foreground focus:border-border sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:border focus:px-4 focus:py-2"
-        >
-          Skip to content
-        </a>
-
-        {/*
-          The fixed page-wide "CX" watermark is removed. It duplicated the
-          giant background "C" in HeroSection at lower opacity, so the two
-          stacked on every screen, and design2.md's "Giant BG" row describes a
-          single element.
-        */}
-
-        <div className="relative z-10 flex flex-col min-h-screen">
-          <Navbar />
-          <main id="main" tabIndex={-1}>
-            {children}
-          </main>
-          <Footer />
-        </div>
-      </body>
-    </html>
+      <Script id="theme-init" strategy="beforeInteractive">
+        {themeInitScript}
+      </Script>
+      <RootDocument
+        fontVariables={`${russoOne.variable} ${spaceMono.variable} ${inter.variable}`}
+      >
+        {children}
+      </RootDocument>
+    </>
   );
 }
