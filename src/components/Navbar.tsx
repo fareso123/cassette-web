@@ -5,15 +5,12 @@ import { ThemeController } from './ThemeController';
 
 export function Navbar() {
   return (
-    <nav
-      aria-label="Main"
-      className="border-b border-base-content/20 bg-base-100 paper-grain font-mono"
-    >
+    <nav aria-label="Main" className="border-border bg-background font-mono border-b">
       {/* Top thin strip */}
-      <div className="flex items-center justify-between px-6 py-1 text-[10px] uppercase tracking-[0.2em] text-base-content/60">
+      <div className="text-muted-foreground flex items-center justify-between px-6 py-1 text-[10px] tracking-[0.2em]">
         <div className="flex items-center gap-4">
           <span translate="no">MUSIC PLAYER</span>
-          <span className="text-base-content/40">·</span>
+          <span className="opacity-50">·</span>
           <span>RECORD START</span>
         </div>
         <div className="flex items-center gap-4">
@@ -23,8 +20,11 @@ export function Navbar() {
       </div>
 
       {/* Main nav bar */}
-      <div className="px-6 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+      <div className="flex items-center justify-between px-6 py-3">
+        <Link
+          href="/"
+          className="focus-visible:ring-ring flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-offset-2"
+        >
           {/* Cassette icon */}
           <svg
             width="28"
@@ -43,31 +43,28 @@ export function Navbar() {
             <rect x="10" y="1.5" width="8" height="3" rx="0.5" stroke="currentColor" strokeWidth="1" />
           </svg>
           <div className="flex flex-col">
-            <span
-              className="text-lg font-bold leading-none tracking-tight"
-              style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.02em' }}
-            >
+            <span className="font-display text-lg leading-none font-bold tracking-tight">
               <span translate="no">COUNDEX</span>
             </span>
-            <span className="text-[9px] uppercase tracking-[0.2em] text-base-content/60">
+            <span className="text-muted-foreground text-[9px] tracking-[0.2em]">
               HF-S 800
             </span>
           </div>
         </Link>
 
         <div className="flex items-center gap-2">
-          <span className="hidden md:inline text-[10px] uppercase tracking-[0.15em] text-base-content/50 mr-2">
+          <span className="text-muted-foreground mr-2 hidden text-[10px] tracking-[0.15em] md:inline">
             LOUNDEX
           </span>
         </div>
       </div>
 
       {/* Decorative divider line with playback arrows */}
-      <div className="px-6 flex items-center gap-3 pb-1">
+      <div className="flex items-center gap-3 px-6 pb-1">
         <span className="playback-arrows select-none" aria-hidden="true">
           ◄◄
         </span>
-        <span className="tech-divider flex-1 !py-0 !opacity-100">
+        <span className="tech-divider flex-1 py-0 opacity-100">
           Search · Resolve · Download
         </span>
         <span className="playback-arrows select-none" aria-hidden="true">

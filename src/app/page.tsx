@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { SearchBar } from '@/components/SearchBar';
 import { ResultsTabs } from '@/components/ResultsTabs';
 import { HeroSection } from '@/components/HeroSection';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { ExtractedTrack } from '@/types/extracted';
 import type { ScrapedResult } from '@/types/scraped';
 
@@ -16,8 +17,16 @@ interface RecentSearch {
 const STORAGE_KEY = 'recentSearches';
 const MAX_RECENT = 5;
 
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
+/*
+ * Pinned locale and timeZone. An undefined locale resolves to the server's
+ * locale during SSR and the browser's locale on the client, so the same
+ * timestamp rendered two different strings and React threw a hydration
+ * mismatch on every load. Formatting is a pure function of the value now, so
+ * both renders agree.
+ */
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'medium',
+  timeZone: 'UTC',
 });
 
 function readRecent(): RecentSearch[] {
@@ -90,7 +99,7 @@ export default function Home() {
     const searches = readRecent();
     const updated = [
       { query: q, type: t, timestamp: new Date().toISOString() },
-      ...searches.filter((s) => s.query !== q),
+      ...searches.filter(s => s.query !== q),
     ].slice(0, MAX_RECENT);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     setRecentSearches(updated);
@@ -104,20 +113,24 @@ export default function Home() {
   );
 
   return (
-    <div className="paper-grain">
+    <div>
       <HeroSection />
 
       {/* Search section */}
-      <section className="border-y border-base-content/20 bg-base-100 font-mono" aria-labelledby="search-heading">
-        <div className="px-6 py-2 flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-base-content/50">
+      <section
+        className="border-border bg-background font-mono border-y"
+        aria-labelledby="search-heading"
+      >
+        <div className="text-muted-foreground flex items-center gap-3 px-6 py-2 text-[10px] tracking-[0.2em]">
           <span id="search-heading">Search module</span>
-          <span className="text-base-content/30">·</span>
+          <span className="opacity-40">·</span>
           <span>HF-S 800</span>
           {/* Reflects whether the response carried a valid session */}
           <span className="ml-auto">{authenticated ? 'Signed in' : 'Guest'}</span>
         </div>
+
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-2xl mx-auto">
+          <div className="mx-auto max-w-2xl">
             <SearchBar
               query={query}
               type={type}
@@ -128,24 +141,31 @@ export default function Home() {
             />
 
             {/* Errors inline, with the status announced */}
-            <p
-              role="alert"
-              aria-live="polite"
-              className="mt-3 text-[0.7rem] uppercase tracking-widest text-error"
-            >
-              {error ?? ''}
-            </p>
+            {error ? (
+              <Alert
+                variant="destructive"
+                role="alert"
+                aria-live="polite"
+                className="mt-3"
+              >
+                <AlertDescription className="text-[0.7rem] tracking-widest">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            ) : null}
 
             {/* Recent searches */}
             {recentSearches.length > 0 && (
               <nav className="mt-6" aria-labelledby="recent-heading">
-                <div className="flex items-center gap-3 mb-3 text-[10px] uppercase tracking-[0.2em] text-base-content/50">
+                <div className="text-muted-foreground mb-3 flex items-center gap-3 text-[10px] tracking-[0.2em]">
                   <span id="recent-heading">Recent searches</span>
-                  <span className="flex-1 h-px bg-base-content/20" />
-                  <span className="tabular-nums">{recentSearches.length} entries</span>
+                  <span className="h-px flex-1 bg-current opacity-20" />
+                  <span className="tabular-nums">
+                    {recentSearches.length} entries
+                  </span>
                 </div>
-                <ul className="space-y-1 list-none p-0">
-                  {recentSearches.map((search) => (
+                <ul className="list-none space-y-1 p-0">
+                  {recentSearches.map(search => (
                     <li key={search.query}>
                       <button
                         type="button"
@@ -154,10 +174,10 @@ export default function Home() {
                           setType(search.type);
                           setError(null);
                         }}
-                        className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left text-xs tracking-wider text-base-content/70 hover:text-base-content hover:bg-base-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+                        className="hover:bg-muted focus-visible:ring-ring flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-xs tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
                       >
-                        <span className="truncate min-w-0">{search.query}</span>
-                        <span className="text-base-content/50 shrink-0">
+                        <span className="min-w-0 truncate">{search.query}</span>
+                        <span className="text-muted-foreground shrink-0">
                           {search.type === 'url' ? 'YouTube' : 'Song'} ·{' '}
                           <time dateTime={search.timestamp}>
                             {dateFormatter.format(new Date(search.timestamp))}
@@ -174,10 +194,13 @@ export default function Home() {
       </section>
 
       {/* Results section */}
-      <section className="border-t border-base-content/20 bg-base-100 font-mono" aria-labelledby="results-heading">
-        <div className="px-6 py-2 flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-base-content/50">
+      <section
+        className="border-border bg-background font-mono border-t"
+        aria-labelledby="results-heading"
+      >
+        <div className="text-muted-foreground flex items-center gap-3 px-6 py-2 text-[10px] tracking-[0.2em]">
           <span id="results-heading">Results</span>
-          <span className="text-base-content/30">·</span>
+          <span className="opacity-40">·</span>
           {/* Status region: announces "N results" as searches complete */}
           <p role="status" aria-live="polite" className="tabular-nums">
             {loading
@@ -189,6 +212,7 @@ export default function Home() {
           results={results}
           ytDlpResults={ytDlpResults}
           scraperResults={scraperResults}
+          loading={loading}
         />
       </section>
     </div>

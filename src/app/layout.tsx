@@ -54,30 +54,25 @@ export default function RootLayout({
       // server render stays deterministic.
       suppressHydrationWarning
     >
-      <body className="min-h-screen font-sans transition-colors duration-300 paper-grain">
+      {/*
+        paper-grain lives on body only. It was previously also on the page
+        wrapper, Navbar and Footer, so four 0.04-opacity noise layers stacked
+        into visible mottling rather than reading as a subtle texture.
+      */}
+      <body className="paper-grain bg-background text-foreground font-sans transition-colors duration-300 min-h-screen">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-base-100 focus:text-base-content focus:px-4 focus:py-2 focus:border focus:border-base-content/30"
+          className="focus:bg-background focus:text-foreground focus:border-border sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:border focus:px-4 focus:py-2"
         >
           Skip to content
         </a>
 
-        {/* Giant background decorative text */}
-        <div
-          aria-hidden="true"
-          className="fixed inset-0 pointer-events-none select-none z-0 flex items-center justify-center overflow-hidden"
-          style={{ opacity: '0.04' }}
-        >
-          <span
-            className="leading-none tracking-tight"
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '30vw',
-            }}
-          >
-            <span translate="no">CX</span>
-          </span>
-        </div>
+        {/*
+          The fixed page-wide "CX" watermark is removed. It duplicated the
+          giant background "C" in HeroSection at lower opacity, so the two
+          stacked on every screen, and design2.md's "Giant BG" row describes a
+          single element.
+        */}
 
         <div className="relative z-10 flex flex-col min-h-screen">
           <Navbar />

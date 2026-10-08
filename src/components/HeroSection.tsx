@@ -1,75 +1,69 @@
 'use client';
 
 import { Music, Disc } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export function HeroSection() {
   return (
     <section
-      className="relative py-16 md:py-24 overflow-hidden font-mono"
+      className="relative overflow-hidden py-16 font-mono md:py-24"
       aria-labelledby="hero-heading"
     >
-      {/* Giant background letter */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
-      >
-        <span
-          className="leading-none tracking-tighter opacity-[0.06]"
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(14rem, 36vw, 36rem)',
-          }}
-        >
-          C
-        </span>
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container relative z-10 mx-auto px-4">
         <div className="text-center">
           {/* Sub header */}
-          <div className="text-[10px] uppercase tracking-[0.3em] text-base-content/60 mb-6">
+          <div className="text-muted-foreground mb-6 text-[10px] tracking-[0.3em]">
             ◄◄&nbsp;&nbsp;Search across every source&nbsp;&nbsp;►►
           </div>
 
           {/* Main logo */}
-          <div className="relative inline-flex flex-col items-center mb-6">
+          {/*
+            The giant background "C" that used to sit behind the wordmark is
+            gone. The page-wide "CX" in layout.tsx did the same job at lower
+            opacity, so the two stacked, and design2.md's "Giant BG" row
+            describes one element rather than two.
+          */}
+          <div className="relative mb-6 inline-flex flex-col items-center">
             {/* Decorative loop; stops under prefers-reduced-motion */}
             <Disc
-              className="absolute w-48 h-48 text-primary/10 spin-slow motion-reduce:animate-none"
+              className="spin-slow text-primary/10 absolute size-48 motion-reduce:animate-none"
               aria-hidden="true"
             />
-            <Music className="w-12 h-12 text-primary mb-3 relative z-10" aria-hidden="true" />
+            <Music
+              className="text-primary relative z-10 mb-3 size-12"
+              aria-hidden="true"
+            />
             <h1
               id="hero-heading"
-              className="text-5xl sm:text-7xl md:text-9xl font-black tracking-tighter leading-none text-balance"
-              style={{
-                fontFamily: 'var(--font-display)',
-                letterSpacing: '-0.04em',
-                color: 'var(--c-text)',
-              }}
+              className="font-display text-5xl leading-none font-black tracking-tighter text-balance sm:text-7xl md:text-9xl"
             >
               <span translate="no">COUNDEX</span>
             </h1>
           </div>
 
           {/* Tagline */}
-          <p className="text-sm uppercase tracking-[0.25em] text-base-content/60 mb-10 text-pretty">
+          <p className="text-muted-foreground mb-10 text-pretty text-sm tracking-[0.25em]">
             Music search engine
           </p>
 
           {/* Source badges */}
-          <ul className="flex flex-wrap items-center justify-center gap-2 mb-2 list-none p-0">
+          <ul className="mb-2 flex list-none flex-wrap items-center justify-center gap-2 p-0">
             {[
               { label: 'YouTube', color: 'bg-primary' },
               { label: 'Torrents', color: 'bg-secondary' },
               { label: 'MP3 Sites', color: 'bg-accent' },
-            ].map((source) => (
-              <li
-                key={source.label}
-                className="inline-flex items-center gap-2 px-3 py-1.5 border border-base-content/20 text-[10px] uppercase tracking-[0.2em] text-base-content/70"
-              >
-                <span className={`w-1.5 h-1.5 ${source.color} inline-block`} aria-hidden="true" />
-                <span translate="no">{source.label}</span>
+            ].map(source => (
+              <li key={source.label}>
+                <Badge
+                  variant="outline"
+                  className="text-muted-foreground gap-2 px-3 py-1.5 text-[10px] tracking-[0.2em]"
+                >
+                  <span
+                    className={`${source.color} inline-block size-1.5`}
+                    aria-hidden="true"
+                  />
+                  <span translate="no">{source.label}</span>
+                </Badge>
               </li>
             ))}
           </ul>
