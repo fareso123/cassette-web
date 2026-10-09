@@ -1,10 +1,10 @@
 'use client';
 
 import { Search, Music, Link2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Spinner } from '@/components/ui/spinner';
@@ -25,18 +25,22 @@ export function SearchBar({
   type,
   loading,
   onQueryChange,
-  onTypeChange,
   onSubmit,
+  onTypeChange,
 }: SearchBarProps) {
   const isUrl = type === 'url';
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      {/*
-        ToggleGroup replaces the old role="group" + aria-pressed pair. Base UI
-        moves this between items with a single tab stop and arrow keys, where
-        the previous markup made each button its own tab stop.
-      */}
+    <form
+      onSubmit={onSubmit}
+      className={cn(
+        'mx-auto w-full max-w-2xl',
+        // One control: the toggle sits above the field, and the submit
+        // button is attached to the field's right edge so it reads as a
+        // single synced unit rather than three separate widgets.
+        'flex flex-col gap-2'
+      )}
+    >
       <ToggleGroup
         value={[type]}
         onValueChange={value => {
@@ -64,19 +68,19 @@ export function SearchBar({
         </ToggleGroupItem>
       </ToggleGroup>
 
-      {/* Search input + submit */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-        <InputGroup className="h-auto py-0">
+      <div className="flex flex-row items-stretch gap-2">
+        <InputGroup className="flex-1">
           <InputGroupAddon>
             <Search aria-hidden="true" className="text-muted-foreground" />
           </InputGroupAddon>
 
           {/*
-            type is always "search". The old markup set type="url" in URL mode,
-            which made the browser block submission through native constraint
-            validation and show its own bubble instead of the app's role="alert"
-            region. inputMode still gives URL keyboards on mobile; validation
-            belongs to one place, and the server already does it.
+            type is always "search". The old markup set type="url" in URL
+            mode, which made the browser block submission through native
+            constraint validation and show its own bubble instead of the
+            app's role="alert" region. inputMode still gives URL keyboards
+            on mobile; validation belongs to one place, and the server
+            already does it.
           */}
           <InputGroupInput
             id="search-query"
@@ -92,44 +96,38 @@ export function SearchBar({
             spellCheck={false}
             aria-describedby="search-hint"
             className={cn(
-              'py-2.5',
-              // The clear affordance the native search type adds is a square
-              // box that fights the rounded field.
+              'h-11 py-0',
+              // The clear affordance the native search type adds is a
+              // square box that fights the rounded field.
               '[&::-webkit-search-cancel-button]:appearance-none'
             )}
           />
-        </InputGroup>
 
-        {/*
-          InputGroupButton restricts `size` to its own xs/sm/icon scale, so the
-          submit button takes no size prop and is sized in className. It is a
-          standalone Button rather than an addon because on mobile it sits on
-          its own row below the field.
-        */}
-        <Button
-          type="submit"
-          variant="default"
-          disabled={loading}
-          className="h-11 shrink-0 gap-2 rounded-md px-5 sm:w-auto"
-        >
-          {loading ? (
-            <>
-              <Spinner data-icon="inline-start" />
-              Searching
-            </>
-          ) : (
-            <>
-              <Search data-icon="inline-start" aria-hidden="true" />
-              Search
-            </>
-          )}
-        </Button>
+          <InputGroupButton
+            type="submit"
+            variant="default"
+            disabled={loading}
+            className="h-11 shrink-0 gap-2 rounded-md px-5"
+          >
+            {loading ? (
+              <>
+                <Spinner data-icon="inline-start" />
+                Searching
+              </>
+            ) : (
+              <>
+                <Search data-icon="inline-start" aria-hidden="true" />
+                Search
+              </>
+            )}
+          </InputGroupButton>
+        </InputGroup>
       </div>
 
       <p id="search-hint" className="text-muted-foreground text-xs">
         {isUrl
           ? 'Paste a YouTube video or playlist link'
-          : 'Searches YouTube, torrent sites and MP3 sources'}
+          : 'Searches YouTube for audio'}
       </p>
     </form>
   );

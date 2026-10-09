@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { SearchBar } from '@/components/SearchBar';
 import { ResultsTabs } from '@/components/ResultsTabs';
 import { HeroSection } from '@/components/HeroSection';
+import { PlayerPanel } from '@/components/PlayerPanel';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { ExtractedTrack } from '@/types/extracted';
 import type { ScrapedResult } from '@/types/scraped';
@@ -58,6 +59,7 @@ export default function Home() {
   );
   const [error, setError] = useState<string | null>(null);
   const [authenticated, setAuthenticated] = useState(false);
+  const [selected, setSelected] = useState<ExtractedTrack | ScrapedResult | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,6 +67,7 @@ export default function Home() {
 
     setLoading(true);
     setError(null);
+    setSelected(null);
     try {
       const response = await fetch('/api/search', {
         method: 'POST',
@@ -113,24 +116,52 @@ export default function Home() {
   );
 
   return (
-    <div>
-      <HeroSection />
+    <div className="mx-auto flex w-full max-w-5xl items-start gap-6 px-4 pb-12 pt-6">
+      {/* Left: compact player panel — opens when a result is clicked */}
+      {selected ? (
+        <div className="w-72 shrink-0">
+          <PlayerPanel
+            title={selected.title}
+            artist={
+              'directAudioUrl' in selected ? selected.artist : selected.artist
+            }
+            thumbnail={
+              'directAudioUrl' in selected ? selected.thumbnail : undefined
+            }
+            downloadUrl={
+              'directAudioUrl' in selected
+                ? selected.directAudioUrl || undefined
+                : selected.downloadUrl || undefined
+            }
+            source={
+              'directAudioUrl' in selected ? 'YouTube' : selected.sourceSite
+            }
+            duration={
+              'directAudioUrl' in selected ? selected.duration : undefined
+            }
+            onClose={() => setSelected(null)}
+          />
+        </div>
+      ) : null}
 
-      {/* Search section */}
-      <section
-        className="mx-auto w-full max-w-2xl px-4 pb-10"
-        aria-labelledby="search-heading"
-      >
-        <h2 id="search-heading" className="sr-only">
-          Search
-        </h2>
+      {/* Right: search + results */}
+      <div className="flex min-w-0 flex-1 flex-col gap-8">
+        <HeroSection />
 
-        {/* Reflects whether the response carried a valid session. */}
-        <p className="text-muted-foreground mb-3 text-xs">
-          {authenticated ? 'Signed in' : 'Not signed in'}
-        </p>
+        {/* Search section */}
+        <section
+          className="mx-auto w-full max-w-2xl"
+          aria-labelledby="search-heading"
+        >
+          <h2 id="search-heading" className="sr-only">
+            Search
+          </h2>
 
-        <div>
+          {/* Reflects whether the response carried a valid session. */}
+          <p className="text-muted-foreground mb-3 text-xs">
+            {authenticated ? 'Signed in' : 'Not signed in'}
+          </p>
+
           <SearchBar
             query={query}
             type={type}
@@ -186,37 +217,38 @@ export default function Home() {
               </ul>
             </nav>
           )}
-        </div>
-      </section>
+        </section>
 
-      {/* Results section */}
-      <section
-        className="mx-auto w-full max-w-4xl px-4 pb-12"
-        aria-labelledby="results-heading"
-      >
-        <div className="mb-3 flex items-baseline gap-2">
-          <h2 id="results-heading" className="text-sm font-medium">
-            Results
-          </h2>
-          {/* Status region: announces "N results" as searches complete */}
-          <p
-            role="status"
-            aria-live="polite"
-            className="text-muted-foreground text-xs tabular-nums"
-          >
-            {loading
-              ? 'Searching…'
-              : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
-          </p>
-        </div>
+        {/* Results section */}
+        <section
+          className="w-full"
+          aria-labelledby="results-heading"
+        >
+          <div className="mb-3 flex items-baseline gap-2">
+            <h2 id="results-heading" className="text-sm font-medium">
+              Results
+            </h2>
+            {/* Status region: announces "N results" as searches complete */}
+            <p
+              role="status"
+              aria-live="polite"
+              className="text-muted-foreground text-xs tabular-nums"
+            >
+              {loading
+                ? 'Searching…'
+                : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
+            </p>
+          </div>
 
-        <ResultsTabs
-          results={results}
-          ytDlpResults={ytDlpResults}
-          scraperResults={scraperResults}
-          loading={loading}
-        />
-      </section>
+          <ResultsTabs
+            results={results}
+            ytDlpResults={ytDlpResults}
+            scraperResults={scraperResults}
+            loading={loading}
+            onSelect={setSelected}
+          />
+        </section>
+      </div>
     </div>
   );
 }

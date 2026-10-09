@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface ResultCardProps {
   title: string;
@@ -17,6 +18,7 @@ interface ResultCardProps {
   source?: string;
   thumbnail?: string;
   duration?: number;
+  onClick?: () => void;
 }
 
 function formatDuration(duration: number): string {
@@ -31,9 +33,19 @@ export function ResultCard({
   source,
   thumbnail,
   duration,
+  onClick,
 }: ResultCardProps) {
   return (
-    <Card className="bg-card group overflow-hidden py-0 transition-shadow hover:shadow-md">
+    <Card
+      className={cn(
+        'bg-card group overflow-hidden py-0 transition-shadow hover:shadow-md',
+        onClick && 'cursor-pointer'
+      )}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+    >
       {/* Thumbnail strip */}
       {thumbnail ? (
         <div className="relative h-40 shrink-0 overflow-hidden">

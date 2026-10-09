@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkRateLimit } from '../../../lib/rate-limit';
 import { parseYouTubeUrl } from '@/lib/youtube';
-import { extract } from '../../../lib/extractors/yt-dlp';
+import { extract, extractSearch } from '../../../lib/extractors/yt-dlp';
 import { scraperRegistry } from '../../../lib/scrapers/registry';
 import { validateSession } from '../../../lib/session';
 import { recordSearch } from '../../../lib/search-history';
 import type { ScrapedResult } from '../../../types/scraped';
+import type { ExtractedTrack } from '../../../types/extracted';
 import type { SearchResponse } from '../../../types/search';
 
 /** Anonymous callers share a per-IP budget. */
@@ -74,27 +75,44 @@ export async function POST(request: NextRequest): Promise<Response> {
       response.results = tracks;
       response.resultCount = tracks.length;
     } else {
-      const scrapers = await scraperRegistry.getEnabled();
-      const settled = await Promise.allSettled(
-        scrapers.map(s => s.search(query))
-      );
+      // Song queries are resolved through yt-dlp's ytsearch extractor, which
+      // returns real YouTube audio tracks. The database-driven scrapers are a
+      // fallback: their CSS selectors are unverified and they carry no direct
+      // audio URL, so they only contribute when ytsearch comes up empty.
+      let tracks: ExtractedTrack[] = [];
+      try {
+        tracks = await extractSearch(query, 5);
+      } catch (err) {
+        console.error('yt-dlp ytsearch failed, falling back to scrapers:', err);
+      }
 
-      const allResults = settled
-        .filter(
-          (r): r is PromiseFulfilledResult<ScrapedResult[]> =>
-            r.status === 'fulfilled'
-        )
-        .flatMap(r => r.value);
+      if (tracks.length > 0) {
+        response.source = 'yt-dlp';
+        response.results = tracks;
+        response.resultCount = tracks.length;
+      } else {
+        const scrapers = await scraperRegistry.getEnabled();
+        const settled = await Promise.allSettled(
+          scrapers.map(s => s.search(query))
+        );
 
-      const seen = new Set<string>();
-      const deduped = allResults.filter(r => {
-        if (seen.has(r.downloadUrl)) return false;
-        seen.add(r.downloadUrl);
-        return true;
-      });
+        const allResults = settled
+          .filter(
+            (r): r is PromiseFulfilledResult<ScrapedResult[]> =>
+              r.status === 'fulfilled'
+          )
+          .flatMap(r => r.value);
 
-      response.results = deduped;
-      response.resultCount = deduped.length;
+        const seen = new Set<string>();
+        const deduped = allResults.filter(r => {
+          if (seen.has(r.downloadUrl)) return false;
+          seen.add(r.downloadUrl);
+          return true;
+        });
+
+        response.results = deduped;
+        response.resultCount = deduped.length;
+      }
     }
 
     // Only a signed-in user's history is persisted. Anonymous searches stay

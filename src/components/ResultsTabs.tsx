@@ -23,6 +23,7 @@ interface ResultsTabsProps {
   ytDlpResults: ExtractedTrack[];
   scraperResults: ScrapedResult[];
   loading?: boolean;
+  onSelect?: (result: ExtractedTrack | ScrapedResult) => void;
 }
 
 type Card = React.ComponentProps<typeof ResultCard>;
@@ -70,9 +71,11 @@ const SKELETON_COUNT = 6;
 function ResultGrid({
   results,
   loading,
+  onSelect,
 }: {
   results: (ExtractedTrack | ScrapedResult)[];
   loading?: boolean;
+  onSelect?: (result: ExtractedTrack | ScrapedResult) => void;
 }) {
   if (loading) {
     return (
@@ -99,7 +102,7 @@ function ResultGrid({
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
       {results.map(result => (
-        <ResultCard key={resultKey(result)} {...toCard(result)} />
+        <ResultCard key={resultKey(result)} {...toCard(result)} onClick={onSelect ? () => onSelect(result) : undefined} />
       ))}
     </div>
   );
@@ -110,6 +113,7 @@ export function ResultsTabs({
   ytDlpResults,
   scraperResults,
   loading = false,
+  onSelect,
 }: ResultsTabsProps) {
   const tabs = [
     { value: 'all', label: 'All', results: results },
@@ -154,7 +158,7 @@ export function ResultsTabs({
                 </EmptyHeader>
               </Empty>
             ) : (
-              <ResultGrid results={tab.results} loading={loading} />
+              <ResultGrid results={tab.results} loading={loading} onSelect={onSelect} />
             )}
           </TabsContent>
         ))}
