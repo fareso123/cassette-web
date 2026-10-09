@@ -24,6 +24,8 @@ interface ResultsTabsProps {
   scraperResults: ScrapedResult[];
   loading?: boolean;
   onSelect?: (result: ExtractedTrack | ScrapedResult) => void;
+  onAddToQueue?: (result: ExtractedTrack | ScrapedResult) => void;
+  inQueue?: (result: ExtractedTrack | ScrapedResult) => boolean;
 }
 
 type Card = React.ComponentProps<typeof ResultCard>;
@@ -72,10 +74,14 @@ function ResultGrid({
   results,
   loading,
   onSelect,
+  onAddToQueue,
+  inQueue,
 }: {
   results: (ExtractedTrack | ScrapedResult)[];
   loading?: boolean;
   onSelect?: (result: ExtractedTrack | ScrapedResult) => void;
+  onAddToQueue?: (result: ExtractedTrack | ScrapedResult) => void;
+  inQueue?: (result: ExtractedTrack | ScrapedResult) => boolean;
 }) {
   if (loading) {
     return (
@@ -102,7 +108,13 @@ function ResultGrid({
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
       {results.map(result => (
-        <ResultCard key={resultKey(result)} {...toCard(result)} onClick={onSelect ? () => onSelect(result) : undefined} />
+        <ResultCard
+          key={resultKey(result)}
+          {...toCard(result)}
+          onClick={onSelect ? () => onSelect(result) : undefined}
+          onAddToQueue={onAddToQueue ? () => onAddToQueue(result) : undefined}
+          inQueue={inQueue ? inQueue(result) : false}
+        />
       ))}
     </div>
   );
@@ -114,6 +126,8 @@ export function ResultsTabs({
   scraperResults,
   loading = false,
   onSelect,
+  onAddToQueue,
+  inQueue,
 }: ResultsTabsProps) {
   const tabs = [
     { value: 'all', label: 'All', results: results },
@@ -158,7 +172,13 @@ export function ResultsTabs({
                 </EmptyHeader>
               </Empty>
             ) : (
-              <ResultGrid results={tab.results} loading={loading} onSelect={onSelect} />
+              <ResultGrid
+                results={tab.results}
+                loading={loading}
+                onSelect={onSelect}
+                onAddToQueue={onAddToQueue}
+                inQueue={inQueue}
+              />
             )}
           </TabsContent>
         ))}

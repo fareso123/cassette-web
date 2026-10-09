@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Clock } from 'lucide-react';
+import { Download, Clock, Plus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -19,6 +19,8 @@ interface ResultCardProps {
   thumbnail?: string;
   duration?: number;
   onClick?: () => void;
+  onAddToQueue?: () => void;
+  inQueue?: boolean;
 }
 
 function formatDuration(duration: number): string {
@@ -34,6 +36,8 @@ export function ResultCard({
   thumbnail,
   duration,
   onClick,
+  onAddToQueue,
+  inQueue = false,
 }: ResultCardProps) {
   return (
     <Card
@@ -109,23 +113,49 @@ export function ResultCard({
 
       <CardFooter className="mt-auto border-t bg-transparent p-4 pt-0">
         {downloadUrl ? (
-          <Button
-            render={
-              // An anchor, not a button: this opens a cross-origin download in
-              // a new tab, which is a navigation, not an in-page action. A real
-              // <button> would break middle-click, copy-link and the browser's
-              // link preview in the status bar.
-              <a href={downloadUrl} target="_blank" rel="noopener noreferrer" />
-            }
-            // Base UI assumes a <button> host by default and warns when the
-            // rendered element is not one. This is deliberately a link.
-            nativeButton={false}
-            variant="secondary"
-            className="w-full gap-2 rounded-md"
-          >
-            <Download data-icon="inline-start" aria-hidden="true" />
-            Download
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1 gap-2 rounded-md"
+              disabled={inQueue}
+              onClick={e => {
+                // Stop the card's own click handler from firing — adding to
+                // the queue is an in-page action, not a navigation.
+                e.stopPropagation();
+                onAddToQueue?.();
+              }}
+            >
+              {inQueue ? (
+                <>
+                  <Check data-icon="inline-start" aria-hidden="true" />
+                  In queue
+                </>
+              ) : (
+                <>
+                  <Plus data-icon="inline-start" aria-hidden="true" />
+                  Add to queue
+                </>
+              )}
+            </Button>
+            <Button
+              render={
+                // An anchor, not a button: this opens a cross-origin download in
+                // a new tab, which is a navigation, not an in-page action. A real
+                // <button> would break middle-click, copy-link and the browser's
+                // link preview in the status bar.
+                <a href={downloadUrl} target="_blank" rel="noopener noreferrer" />
+              }
+              // Base UI assumes a <button> host by default and warns when the
+              // rendered element is not one. This is deliberately a link.
+              nativeButton={false}
+              variant="default"
+              className="flex-1 gap-2 rounded-md"
+            >
+              <Download data-icon="inline-start" aria-hidden="true" />
+              Download
+            </Button>
+          </div>
         ) : (
           <>
             {/* Visible text, not a disabled control: a disabled button is

@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { SearchBar } from '@/components/SearchBar';
 import { ResultsTabs } from '@/components/ResultsTabs';
 import { HeroSection } from '@/components/HeroSection';
 import { PlayerPanel } from '@/components/PlayerPanel';
+import { QueuePanel } from '@/components/QueuePanel';
+import { QueueProvider, useQueue } from '@/components/QueueProvider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ListMusic } from 'lucide-react';
 import type { ExtractedTrack } from '@/types/extracted';
 import type { ScrapedResult } from '@/types/scraped';
 
@@ -49,7 +52,12 @@ function readRecent(): RecentSearch[] {
   }
 }
 
-export default function Home() {
+/**
+ * Inline component that holds all the page state and wires the queue into
+ * the result cards. Kept separate from Home so it stays inside the
+ * QueueProvider tree.
+ */
+function HomePage() {
   const [query, setQuery] = useState('');
   const [type, setType] = useState<'song' | 'url'>('song');
   const [loading, setLoading] = useState(false);
@@ -60,6 +68,9 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [authenticated, setAuthenticated] = useState(false);
   const [selected, setSelected] = useState<ExtractedTrack | ScrapedResult | null>(null);
+  const [queueOpen, setQueueOpen] = useState(false);
+
+  const { add, queue: queuedTracks, count: queueCount } = useQueue();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -115,140 +126,186 @@ export default function Home() {
     (r): r is ScrapedResult => !('directAudioUrl' in r)
   );
 
+  const isInQueue = useCallback(
+    (result: ExtractedTrack | ScrapedResult) => {
+      const url =
+        'directAudioUrl' in result
+          ? result.directAudioUrl
+          : result.downloadUrl;
+      if (!url) return false;
+      return queuedTracks.some(t => t.downloadUrl === url);
+    },
+    [queuedTracks]
+  );
+
+  function handleAddToQueue(result: ExtractedTrack | ScrapedResult) {
+    add(result);
+  }
+
   return (
-    <div className="mx-auto flex w-full max-w-5xl items-start gap-6 px-4 pb-12 pt-6">
-      {/* Left: compact player panel — opens when a result is clicked */}
-      {selected ? (
-        <div className="w-72 shrink-0">
-          <PlayerPanel
-            title={selected.title}
-            artist={
-              'directAudioUrl' in selected ? selected.artist : selected.artist
-            }
-            thumbnail={
-              'directAudioUrl' in selected ? selected.thumbnail : undefined
-            }
-            downloadUrl={
-              'directAudioUrl' in selected
-                ? selected.directAudioUrl || undefined
-                : selected.downloadUrl || undefined
-            }
-            source={
-              'directAudioUrl' in selected ? 'YouTube' : selected.sourceSite
-            }
-            duration={
-              'directAudioUrl' in selected ? selected.duration : undefined
-            }
-            onClose={() => setSelected(null)}
-          />
-        </div>
-      ) : null}
-
-      {/* Right: search + results */}
-      <div className="flex min-w-0 flex-1 flex-col gap-8">
-        <HeroSection />
-
-        {/* Search section */}
-        <section
-          className="mx-auto w-full max-w-2xl"
-          aria-labelledby="search-heading"
-        >
-          <h2 id="search-heading" className="sr-only">
-            Search
-          </h2>
-
-          {/* Reflects whether the response carried a valid session. */}
-          <p className="text-muted-foreground mb-3 text-xs">
-            {authenticated ? 'Signed in' : 'Not signed in'}
-          </p>
-
-          <SearchBar
-            query={query}
-            type={type}
-            loading={loading}
-            onQueryChange={setQuery}
-            onTypeChange={setType}
-            onSubmit={handleSubmit}
-          />
-
-          {/* Errors inline, with the status announced */}
-          {error ? (
-            <Alert
-              variant="destructive"
-              role="alert"
-              aria-live="polite"
-              className="mt-3"
-            >
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : null}
-
-          {/* Recent searches */}
-          {recentSearches.length > 0 && (
-            <nav className="mt-8" aria-labelledby="recent-heading">
-              <h3
-                id="recent-heading"
-                className="text-muted-foreground mb-2 text-xs font-medium"
-              >
-                Recent searches
-              </h3>
-              <ul className="flex list-none flex-col gap-1 p-0">
-                {recentSearches.map(search => (
-                  <li key={search.query}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setQuery(search.query);
-                        setType(search.type);
-                        setError(null);
-                      }}
-                      className="hover:bg-muted focus-visible:ring-ring flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
-                    >
-                      <span className="min-w-0 truncate">{search.query}</span>
-                      <span className="text-muted-foreground shrink-0 text-xs">
-                        {search.type === 'url' ? 'YouTube' : 'Song'} ·{' '}
-                        <time dateTime={search.timestamp}>
-                          {dateFormatter.format(new Date(search.timestamp))}
-                        </time>
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          )}
-        </section>
-
-        {/* Results section */}
-        <section
-          className="w-full"
-          aria-labelledby="results-heading"
-        >
-          <div className="mb-3 flex items-baseline gap-2">
-            <h2 id="results-heading" className="text-sm font-medium">
-              Results
-            </h2>
-            {/* Status region: announces "N results" as searches complete */}
-            <p
-              role="status"
-              aria-live="polite"
-              className="text-muted-foreground text-xs tabular-nums"
-            >
-              {loading
-                ? 'Searching…'
-                : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
-            </p>
+    <>
+      <div className="mx-auto flex w-full max-w-5xl items-start gap-6 px-4 pb-12 pt-6">
+        {/* Left: compact player panel — opens when a result is clicked */}
+        {selected ? (
+          <div className="w-72 shrink-0">
+            <PlayerPanel
+              title={selected.title}
+              artist={
+                'directAudioUrl' in selected ? selected.artist : selected.artist
+              }
+              thumbnail={
+                'directAudioUrl' in selected ? selected.thumbnail : undefined
+              }
+              downloadUrl={
+                'directAudioUrl' in selected
+                  ? selected.directAudioUrl || undefined
+                  : selected.downloadUrl || undefined
+              }
+              source={
+                'directAudioUrl' in selected ? 'YouTube' : selected.sourceSite
+              }
+              duration={
+                'directAudioUrl' in selected ? selected.duration : undefined
+              }
+              onClose={() => setSelected(null)}
+            />
           </div>
+        ) : null}
 
-          <ResultsTabs
-            results={results}
-            ytDlpResults={ytDlpResults}
-            scraperResults={scraperResults}
-            loading={loading}
-            onSelect={setSelected}
-          />
-        </section>
+        {/* Right: search + results */}
+        <div className="flex min-w-0 flex-1 flex-col gap-8">
+          <HeroSection />
+
+          {/* Search section */}
+          <section
+            className="mx-auto w-full max-w-2xl"
+            aria-labelledby="search-heading"
+          >
+            <h2 id="search-heading" className="sr-only">
+              Search
+            </h2>
+
+            {/* Reflects whether the response carried a valid session. */}
+            <p className="text-muted-foreground mb-3 text-xs">
+              {authenticated ? 'Signed in' : 'Not signed in'}
+            </p>
+
+            <SearchBar
+              query={query}
+              type={type}
+              loading={loading}
+              onQueryChange={setQuery}
+              onTypeChange={setType}
+              onSubmit={handleSubmit}
+            />
+
+            {/* Errors inline, with the status announced */}
+            {error ? (
+              <Alert
+                variant="destructive"
+                role="alert"
+                aria-live="polite"
+                className="mt-3"
+              >
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
+
+            {/* Recent searches */}
+            {recentSearches.length > 0 && (
+              <nav className="mt-8" aria-labelledby="recent-heading">
+                <h3
+                  id="recent-heading"
+                  className="text-muted-foreground mb-2 text-xs font-medium"
+                >
+                  Recent searches
+                </h3>
+                <ul className="flex list-none flex-col gap-1 p-0">
+                  {recentSearches.map(search => (
+                    <li key={search.query}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setQuery(search.query);
+                          setType(search.type);
+                          setError(null);
+                        }}
+                        className="hover:bg-muted focus-visible:ring-ring flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+                      >
+                        <span className="min-w-0 truncate">{search.query}</span>
+                        <span className="text-muted-foreground shrink-0 text-xs">
+                          {search.type === 'url' ? 'YouTube' : 'Song'} ·{' '}
+                          <time dateTime={search.timestamp}>
+                            {dateFormatter.format(new Date(search.timestamp))}
+                          </time>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+          </section>
+
+          {/* Results section */}
+          <section
+            className="w-full"
+            aria-labelledby="results-heading"
+          >
+            <div className="mb-3 flex items-baseline gap-2">
+              <h2 id="results-heading" className="text-sm font-medium">
+                Results
+              </h2>
+              {/* Status region: announces "N results" as searches complete */}
+              <p
+                role="status"
+                aria-live="polite"
+                className="text-muted-foreground text-xs tabular-nums"
+              >
+                {loading
+                  ? 'Searching…'
+                  : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
+              </p>
+            </div>
+
+            <ResultsTabs
+              results={results}
+              ytDlpResults={ytDlpResults}
+              scraperResults={scraperResults}
+              loading={loading}
+              onSelect={setSelected}
+              onAddToQueue={handleAddToQueue}
+              inQueue={isInQueue}
+            />
+          </section>
+        </div>
       </div>
-    </div>
+
+      {/* Queue FAB — bottom right, with badge when count > 0 */}
+      <button
+        type="button"
+        onClick={() => setQueueOpen(true)}
+        className="fixed bottom-6 right-6 z-30 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
+        aria-label={`Open download queue (${queueCount} tracks)`}
+      >
+        <ListMusic className="size-5" aria-hidden="true" />
+        {queueCount > 0 ? (
+          <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
+            {queueCount > 99 ? '99+' : queueCount}
+          </span>
+        ) : null}
+      </button>
+
+      {/* Queue side panel */}
+      <QueuePanel open={queueOpen} onClose={() => setQueueOpen(false)} />
+    </>
+  );
+}
+
+export default function Home() {
+  return (
+    <QueueProvider>
+      <HomePage />
+    </QueueProvider>
   );
 }

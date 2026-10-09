@@ -69,7 +69,7 @@ export function SearchBar({
       </ToggleGroup>
 
       <div className="flex flex-row items-stretch gap-2">
-        <InputGroup className="flex-1">
+        <InputGroup className="flex-1 h-11">
           <InputGroupAddon>
             <Search aria-hidden="true" className="text-muted-foreground" />
           </InputGroupAddon>
@@ -96,7 +96,7 @@ export function SearchBar({
             spellCheck={false}
             aria-describedby="search-hint"
             className={cn(
-              'h-11 py-0',
+              'h-full py-0',
               // The clear affordance the native search type adds is a
               // square box that fights the rounded field.
               '[&::-webkit-search-cancel-button]:appearance-none'
@@ -107,7 +107,7 @@ export function SearchBar({
             type="submit"
             variant="default"
             disabled={loading}
-            className="h-11 shrink-0 gap-2 rounded-md px-5"
+            className="h-full shrink-0 gap-2 rounded-md px-5"
           >
             {loading ? (
               <>
