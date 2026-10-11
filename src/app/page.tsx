@@ -119,6 +119,92 @@ function HomePage() {
     setSelectedTrack(null);
   }
 
+  // Render main content (search UI)
+  const mainContent = (
+    <div className="relative min-h-screen flex flex-col">
+      <div className={cn(
+        "mx-auto flex w-full flex-col items-center gap-8 px-4 pb-12 pt-12 transition-all duration-300",
+        panelOpen ? "max-w-[calc(100%-24rem)]" : "max-w-full"
+      )}>
+        <HeroSection />
+
+        {/* Search section */}
+        <section
+          ref={searchContainerRef}
+          className="relative mx-auto w-full max-w-2xl min-w-[280px]"
+          aria-labelledby="search-heading"
+        >
+          <h2 id="search-heading" className="sr-only">
+            Search
+          </h2>
+
+          <p className="text-muted-foreground mb-3 text-xs">
+            {authenticated ? 'Signed in' : 'Not signed in'}
+          </p>
+
+          <SearchBar
+            query={query}
+            type={type}
+            loading={loading}
+            onQueryChange={handleQueryChange}
+            onTypeChange={handleTypeChange}
+            onSubmit={handleSubmit}
+          />
+
+          {/* Results Dropdown */}
+          {dropdownOpen && (
+            <SearchResultsDropdown
+              tracks={tracks}
+              loading={loading}
+              onSelect={handleSelectTrack}
+            />
+          )}
+
+          {error ? (
+            <Alert
+              variant="destructive"
+              role="alert"
+              aria-live="polite"
+              className="mt-3"
+            >
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+        </section>
+      </div>
+
+      {/* Queue FAB - positioned relative to viewport, not panel */}
+      <button
+        type="button"
+        onClick={() => setQueueOpen(true)}
+        className={cn(
+          "fixed bottom-6 z-30 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95",
+          panelOpen ? "right-[calc(6rem + 280px)]" : "right-6"
+        )}
+        aria-label={`Open download queue (${queueCount} tracks)`}
+      >
+        <ListMusic className="size-5" aria-hidden="true" />
+        {queueCount > 0 ? (
+          <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
+            {queueCount > 99 ? '99+' : queueCount}
+          </span>
+        ) : null}
+      </button>
+    </div>
+  );
+
+  // When panel is closed, render main content full width without panel group
+  if (!panelOpen) {
+    return (
+      <div className="relative min-h-screen">
+        {mainContent}
+        {/* Queue side panel */}
+        <QueuePanel open={queueOpen} onClose={() => setQueueOpen(false)} />
+      </div>
+    );
+  }
+
+  // When panel is open, use resizable panel group
   return (
     <div className="relative min-h-screen flex">
       <Group
@@ -127,111 +213,41 @@ function HomePage() {
         className="flex-1 min-w-0"
         style={{ minHeight: '100vh' }}
       >
-        {/* Main content panel */}
+        {/* Main content panel - takes remaining space */}
         <Panel
           id="main-content"
-          defaultSize={panelOpen ? 70 : 100}
-          minSize={panelOpen ? 30 : 0}
+          defaultSize={70}
+          minSize={30}
           maxSize={100}
         >
-          <div className="relative min-h-screen flex flex-col">
-            <div className={cn(
-              "mx-auto flex w-full flex-col items-center gap-8 px-4 pb-12 pt-12 transition-all duration-300",
-              panelOpen ? "max-w-[calc(100%-24rem)]" : "max-w-full"
-            )}>
-              <HeroSection />
-
-              {/* Search section */}
-              <section
-                ref={searchContainerRef}
-                className="relative mx-auto w-full max-w-2xl"
-                aria-labelledby="search-heading"
-              >
-                <h2 id="search-heading" className="sr-only">
-                  Search
-                </h2>
-
-                <p className="text-muted-foreground mb-3 text-xs">
-                  {authenticated ? 'Signed in' : 'Not signed in'}
-                </p>
-
-                <SearchBar
-                  query={query}
-                  type={type}
-                  loading={loading}
-                  onQueryChange={handleQueryChange}
-                  onTypeChange={handleTypeChange}
-                  onSubmit={handleSubmit}
-                />
-
-                {/* Results Dropdown */}
-                {dropdownOpen && (
-                  <SearchResultsDropdown
-                    tracks={tracks}
-                    loading={loading}
-                    onSelect={handleSelectTrack}
-                  />
-                )}
-
-                {error ? (
-                  <Alert
-                    variant="destructive"
-                    role="alert"
-                    aria-live="polite"
-                    className="mt-3"
-                  >
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                ) : null}
-              </section>
-            </div>
-
-            {/* Queue FAB */}
-            <button
-              type="button"
-              onClick={() => setQueueOpen(true)}
-              className="fixed bottom-6 right-6 z-30 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
-              aria-label={`Open download queue (${queueCount} tracks)`}
-            >
-              <ListMusic className="size-5" aria-hidden="true" />
-              {queueCount > 0 ? (
-                <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
-                  {queueCount > 99 ? '99+' : queueCount}
-                </span>
-              ) : null}
-            </button>
-          </div>
+          {mainContent}
         </Panel>
 
         {/* Resize handle */}
-        {panelOpen && (
-          <Separator
-            className={cn(
-              "relative z-50 w-px bg-border hover:bg-primary/50 transition-colors",
-              "after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:size-6 after:rounded-full after:bg-background after:shadow-lg after:transition-all hover:after:scale-110"
-            )}
-            aria-label="Resize details panel"
-          />
-        )}
+        <Separator
+          className={cn(
+            "relative z-50 w-px bg-border hover:bg-primary/50 transition-colors",
+            "after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:size-6 after:rounded-full after:bg-background after:shadow-lg after:transition-all hover:after:scale-110"
+          )}
+          aria-label="Resize details panel"
+        />
 
         {/* Track Details Panel - resizable side panel */}
         <Panel
           id="details-panel"
-          defaultSize={panelOpen ? 30 : 0}
-          minSize={panelOpen ? PANEL_MIN_WIDTH : 0}
+          defaultSize={30}
+          minSize={PANEL_MIN_WIDTH}
           maxSize={PANEL_MAX_WIDTH}
           collapsible
           collapsedSize={0}
         >
-          {panelOpen && (
-            <div className="flex h-full flex-col border-l bg-background shadow-lg overflow-hidden">
-              <SearchPanel
-                open={panelOpen}
-                selectedTrack={selectedTrack}
-                onClose={handlePanelClose}
-              />
-            </div>
-          )}
+          <div className="flex h-full flex-col border-l bg-background shadow-lg overflow-hidden">
+            <SearchPanel
+              open={panelOpen}
+              selectedTrack={selectedTrack}
+              onClose={handlePanelClose}
+            />
+          </div>
         </Panel>
       </Group>
 
