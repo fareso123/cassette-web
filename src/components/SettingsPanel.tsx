@@ -327,7 +327,7 @@ export function SettingsPanel() {
                           <SelectContent>
                             <SelectItem value="">
                               <div className="flex items-center justify-between w-full">
-                                <span>Use global default ({getQualityLabel(globalQuality)})</span>
+                                <span>Use global default ({getQualityLabel(globalQualityState)})</span>
                               </div>
                             </SelectItem>
                             {availableQualities.map(option => (
