@@ -1,5 +1,6 @@
 import type { ExtractedTrack } from './extracted';
 import type { ScrapedResult } from './scraped';
+import type { DownloadResource } from './download';
 
 export interface SearchRequest {
   query: string;
@@ -15,6 +16,8 @@ export interface SearchResponse {
   timestamp: string;
   /** True when the request carried a valid session token. */
   authenticated: boolean;
+  /** Download resources keyed by result index (stringified). */
+  downloadResources?: Record<string, DownloadResource[]>;
 }
 
 export type SearchResult = ExtractedTrack | ScrapedResult;

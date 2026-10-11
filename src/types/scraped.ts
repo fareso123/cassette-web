@@ -1,3 +1,5 @@
+import type { DownloadResource } from './download';
+
 export interface ScraperRegistry {
   register(scraper: ScraperModule): void;
   getByName(name: string): ScraperModule | undefined;
@@ -13,6 +15,7 @@ export interface ScrapedResult {
   quality?: string;
   size?: string;
   scraperName: string;
+  downloadResources?: DownloadResource[];
 }
 
 export interface ScraperConfig {

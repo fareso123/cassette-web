@@ -8,6 +8,7 @@ import { recordSearch } from '../../../lib/search-history';
 import type { ScrapedResult } from '../../../types/scraped';
 import type { ExtractedTrack } from '../../../types/extracted';
 import type { SearchResponse } from '../../../types/search';
+import { hasDownloadProvider } from '@/lib/scrapers/base';
 
 /** Anonymous callers share a per-IP budget. */
 const ANON_WINDOW_MS = 60_000;
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       resultCount: 0,
       timestamp: new Date().toISOString(),
       authenticated: valid,
+      downloadResources: {},
     };
 
     if (type === 'url') {
@@ -96,6 +98,26 @@ export async function POST(request: NextRequest): Promise<Response> {
 
         response.results = deduped;
         response.resultCount = deduped.length;
+
+        // Fetch download resources for each result
+        const downloadResources: Record<string, any[]> = {};
+        for (let i = 0; i < deduped.length; i++) {
+          const track = deduped[i];
+          const scraper = scraperRegistry.getByName(track.scraperName);
+          if (scraper && hasDownloadProvider(scraper)) {
+            try {
+              const resources = await scraper.getDownloadResources(track);
+              if (resources.length > 0) {
+                downloadResources[i.toString()] = resources;
+              }
+            } catch (err) {
+              console.error(`Download resources error for ${track.scraperName}:`, err);
+            }
+          }
+        }
+        if (Object.keys(downloadResources).length > 0) {
+          response.downloadResources = downloadResources;
+        }
       }
     }
 

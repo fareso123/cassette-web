@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import type { ScraperModule, ScrapedResult } from '../../types/scraped';
+import type { DownloadProvider, DownloadResource, QualityOption } from '../../types/download';
 
 export class BaseScraper implements ScraperModule {
   name: string;
@@ -37,9 +38,7 @@ export class BaseScraper implements ScraperModule {
         headers: {
           'User-Agent':
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          Accept:
-            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           ...options.headers,
         },
       });
@@ -58,7 +57,7 @@ export class BaseScraper implements ScraperModule {
     const now = Date.now();
     const timeSinceLastRequest = now - this.lastRequestTime;
     if (timeSinceLastRequest < this.rateLimitMs) {
-      await new Promise(resolve =>
+      await new Promise((resolve) =>
         setTimeout(resolve, this.rateLimitMs - timeSinceLastRequest)
       );
     }
@@ -69,27 +68,45 @@ export class BaseScraper implements ScraperModule {
     const $ = cheerio.load(html);
     const results: ScrapedResult[] = [];
 
-    const containerSelector =
-      selectors.container || '.result, .item, .track, li';
-    const titleSelector = selectors.title || 'h3, .title, .name, a';
-    const artistSelector =
-      selectors.artist || '.artist, .author, .uploader, [class*="artist"]';
-    const linkSelector = selectors.link || 'a[href]';
+    const itemSelector = selectors.item;
+    if (!itemSelector) {
+      return results;
+    }
 
-    $(containerSelector).each((_, element) => {
+    $(itemSelector).each((_, element) => {
       const $el = $(element);
-      const title =
-        $el.find(titleSelector).first().text().trim() ||
-        $el.find('a').first().text().trim();
-      const artist = $el.find(artistSelector).first().text().trim();
-      const link = $el.find(linkSelector).first().attr('href');
 
-      if (title && link) {
+      const title =
+        $el.find(selectors.title).first().text().trim() ||
+        $el.attr('title') ||
+        $el.attr('data-title') ||
+        '';
+      const artist =
+        $el.find(selectors.artist).first().text().trim() ||
+        $el.attr('data-artist') ||
+        '';
+      const downloadUrl =
+        $el.find(selectors.downloadUrl).first().attr('href') ||
+        $el.attr('href') ||
+        $el.find('a').first().attr('href') ||
+        '';
+      const quality =
+        $el.find(selectors.quality).first().text().trim() ||
+        $el.attr('data-quality') ||
+        '';
+      const size =
+        $el.find(selectors.size).first().text().trim() ||
+        $el.attr('data-size') ||
+        '';
+
+      if (title && downloadUrl) {
         results.push({
           title,
-          artist: artist || 'Unknown',
-          sourceSite: this.baseUrl,
-          downloadUrl: this.resolveUrl(link),
+          artist,
+          sourceSite: this.name,
+          downloadUrl: this.resolveUrl(downloadUrl),
+          quality,
+          size,
           scraperName: this.name,
         });
       }
@@ -99,13 +116,45 @@ export class BaseScraper implements ScraperModule {
   }
 
   resolveUrl(url: string): string {
-    if (url.startsWith('http') || url.startsWith('magnet:')) return url;
-    if (url.startsWith('//')) return `https:${url}`;
-    if (url.startsWith('/')) return new URL(url, this.baseUrl).href;
-    return new URL(url, this.baseUrl).href;
+    if (url.startsWith('http')) return url;
+    if (url.startsWith('/')) return `${this.baseUrl}${url}`;
+    return `${this.baseUrl}/${url}`;
   }
 
   async search(_query: string): Promise<ScrapedResult[]> {
     throw new Error('search() must be implemented by subclass');
   }
+
+  // DownloadProvider optional methods - override in subclasses that support downloads
+  async getDownloadResources(_track: ScrapedResult): Promise<DownloadResource[]> {
+    return [];
+  }
+
+  async getDownloadStream(
+    _trackId: string,
+    _qualityId: string,
+    _credentials: Record<string, string>
+  ): Promise<ReadableStream<Uint8Array>> {
+    throw new Error('Download not supported by this scraper');
+  }
+
+  getQualities(): QualityOption[] {
+    return [];
+  }
+
+  async validateCredentials(_credentials: Record<string, string>): Promise<boolean> {
+    return false;
+  }
+}
+
+// Type guard to check if a scraper implements DownloadProvider
+export function hasDownloadProvider(
+  scraper: ScraperModule
+): scraper is ScraperModule & DownloadProvider {
+  return (
+    typeof (scraper as ScraperModule & DownloadProvider).getDownloadResources ===
+      'function' &&
+    typeof (scraper as ScraperModule & DownloadProvider).getDownloadStream ===
+      'function'
+  );
 }

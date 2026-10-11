@@ -3,20 +3,29 @@ import type {
   ScraperConfig,
   ScraperRegistry,
 } from '../../types/scraped';
-import { BaseScraper } from './base';
+import type { DownloadProvider } from '../../types/download';
+import { BaseScraper, hasDownloadProvider } from './base';
 import { TorrentSitesScraper } from './torrent-sites';
 import { MusicSitesScraper } from './music-sites';
 import { SoundCloudScraper } from './soundcloud';
+import { qobuzScraper } from './qobuz';
+import { tidalScraper } from './tidal';
+import { amazonScraper } from './amazon';
+import { ytmusicScraper } from './ytmusic';
 import { scrapers as scrapersTable } from '../../lib/db/schema';
 import { db } from '../../lib/db';
 import { eq } from 'drizzle-orm';
 
 class ScraperRegistryImpl implements ScraperRegistry {
   private scrapers: Map<string, ScraperModule> = new Map();
+  private downloadProviders: Map<string, DownloadProvider> = new Map();
   private initialized = false;
 
   register(scraper: ScraperModule): void {
     this.scrapers.set(scraper.name, scraper);
+    if (hasDownloadProvider(scraper)) {
+      this.downloadProviders.set(scraper.name, scraper);
+    }
   }
 
   getByName(name: string): ScraperModule | undefined {
@@ -27,15 +36,45 @@ class ScraperRegistryImpl implements ScraperRegistry {
     return Array.from(this.scrapers.values());
   }
 
-  async getEnabled(): Promise<ScraperModule[]> {
+  getEnabled(): Promise<ScraperModule[]> {
     if (!this.initialized) {
-      await this.loadFromDatabase();
+      this.initialize();
       this.initialized = true;
     }
-    return this.getAll().filter(s => {
+    return Promise.resolve(this.getAll().filter((s) => {
       const base = s as unknown as BaseScraper;
       return base.enabled;
-    });
+    }));
+  }
+
+  getDownloadProvider(sourceId: string): DownloadProvider | undefined {
+    if (!this.initialized) {
+      this.initialize();
+      this.initialized = true;
+    }
+    return this.downloadProviders.get(sourceId);
+  }
+
+  getAllDownloadProviders(): DownloadProvider[] {
+    if (!this.initialized) {
+      this.initialize();
+      this.initialized = true;
+    }
+    return Array.from(this.downloadProviders.values());
+  }
+
+  private initialize(): void {
+    // Register built-in scrapers
+    this.register(qobuzScraper);
+    this.register(tidalScraper);
+    this.register(amazonScraper);
+    this.register(ytmusicScraper);
+    this.register(new TorrentSitesScraper({ name: 'torrent-sites', baseUrl: '', enabled: true, rateLimitMs: 1000, selectors: {} }));
+    this.register(new MusicSitesScraper({ name: 'music-sites', baseUrl: '', enabled: true, rateLimitMs: 1000, selectors: {} }));
+    this.register(new SoundCloudScraper({ name: 'soundcloud', baseUrl: '', enabled: true, rateLimitMs: 1000, selectors: {} }));
+
+    // Load from database
+    this.loadFromDatabase().catch(console.error);
   }
 
   private async loadFromDatabase(): Promise<void> {
@@ -55,6 +94,9 @@ class ScraperRegistryImpl implements ScraperRegistry {
         const scraper = this.createScraperFromConfig(config);
         if (scraper) {
           this.scrapers.set(scraper.name, scraper);
+          if (hasDownloadProvider(scraper)) {
+            this.downloadProviders.set(scraper.name, scraper);
+          }
         }
       }
     } catch (error) {
