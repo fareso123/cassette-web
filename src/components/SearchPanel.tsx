@@ -79,10 +79,10 @@ export function SearchPanel({ open, selectedTrack, onClose }: SearchPanelProps) 
       role="dialog"
       aria-modal="true"
       aria-labelledby="panel-title"
-      className="w-96 shrink-0 border-l bg-background shadow-lg transition-all duration-300"
+      className="flex h-full flex-col border-l bg-background shadow-lg"
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b px-6 py-4">
+      <div className="flex items-center justify-between border-b px-6 py-4 shrink-0">
         <h2 id="panel-title" className="text-sm font-medium">
           Track Details
         </h2>
@@ -97,7 +97,7 @@ export function SearchPanel({ open, selectedTrack, onClose }: SearchPanelProps) 
       </div>
 
       {/* Content */}
-      <div className="flex h-[calc(100vh-64px)] flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {/* Track Info */}
           <div className="mb-6">
