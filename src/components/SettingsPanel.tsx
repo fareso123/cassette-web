@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Save, Trash2, Key, Music, Settings, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { getCredentials, setCredentials, removeCredentials, hasCredentials, CREDENTIAL_HELP_TEXT, SUPPORTED_SOURCES, type SupportedSource } from '@/lib/credentials';
 import { scraperRegistry } from '@/lib/scrapers/registry';
-import { getGlobalQuality, setGlobalQuality, getSourceQuality, setSourceQuality, removeSourceQuality, getEffectiveQuality, getAvailableQualities, QUALITY_OPTIONS, getQualityLabel, getKindColor, type GlobalQualityId } from '@/lib/quality';
+import { cn } from '@/lib/utils';
 const SOURCE_LABELS: Record<string, string> = {
   qobuz: 'Qobuz',
   tidal: 'Tidal',

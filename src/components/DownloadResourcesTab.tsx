@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { DownloadResource, ScrapedResult } from '@/types/scraped';
+import { DownloadResource } from '@/types/download';
+import type { ScrapedResult } from '@/types/scraped';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -130,7 +131,7 @@ export function DownloadResourcesTab({ track, downloadResources }: DownloadResou
                         <span className="text-xs text-muted-foreground">{quality.description}</span>
                       )}
                       {isEffective && (
-                        <Badge variant="default" size="sm">
+                        <Badge variant="default">
                           <CheckCircle className="h-3 w-3 mr-1" />
                           Your choice
                         </Badge>
