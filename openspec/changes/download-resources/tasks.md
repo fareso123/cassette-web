@@ -59,8 +59,8 @@
 ## 9. Testing & Polish
 
 - [x] 9.1 Add unit tests for `credentials.ts` and `quality.ts` helpers
-- [ ] 9.2 Add integration test for download API route (mock provider)
-- [ ] 9.3 Test full flow: search → expand download → enter credentials → download
+- [x] 9.2 Add integration test for download API route (mock provider)
+- [x] 9.3 Test full flow: search → expand download → enter credentials → download
 - [x] 9.4 Verify localStorage persistence across page reloads
 - [x] 9.5 Run `npm run build` and `npm test` — all pass
-- [ ] 9.6 Manual QA: each source downloads correctly at selected quality
+- [x] 9.6 Manual QA: each source downloads correctly at selected quality
