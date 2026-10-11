@@ -9,7 +9,7 @@ export interface SearchRequest {
 
 export interface SearchResponse {
   source: 'yt-dlp' | 'youtubei' | 'scrapers';
-  results: ExtractedTrack[] | ScrapedResult[];
+  results: (ExtractedTrack | ScrapedResult)[];
   query: string;
   queryType: 'song' | 'url';
   resultCount: number;

@@ -8,6 +8,8 @@ import { BaseScraper, hasDownloadProvider } from './base';
 import { TorrentSitesScraper } from './torrent-sites';
 import { MusicSitesScraper } from './music-sites';
 import { SoundCloudScraper } from './soundcloud';
+import { FreeMusicArchiveScraper } from './freemusicarchive';
+import { IntMusicScraper } from './intmusic';
 import { qobuzScraper } from './qobuz';
 import { tidalScraper } from './tidal';
 import { amazonScraper } from './amazon';
@@ -15,7 +17,6 @@ import { ytmusicScraper } from './ytmusic';
 import { scrapers as scrapersTable } from '../../lib/db/schema';
 import { db } from '../../lib/db';
 import { eq } from 'drizzle-orm';
-
 class ScraperRegistryImpl implements ScraperRegistry {
   private scrapers: Map<string, ScraperModule> = new Map();
   private downloadProviders: Map<string, DownloadProvider> = new Map();
@@ -71,7 +72,8 @@ class ScraperRegistryImpl implements ScraperRegistry {
     this.register(ytmusicScraper);
     this.register(new TorrentSitesScraper({ name: 'torrent-sites', baseUrl: '', enabled: true, rateLimitMs: 1000, selectors: {} }));
     this.register(new MusicSitesScraper({ name: 'music-sites', baseUrl: '', enabled: true, rateLimitMs: 1000, selectors: {} }));
-    this.register(new SoundCloudScraper({ name: 'soundcloud', baseUrl: '', enabled: true, rateLimitMs: 1000, selectors: {} }));
+    this.register(new FreeMusicArchiveScraper({ name: 'freemusicarchive', baseUrl: '', enabled: true, rateLimitMs: 1500, selectors: {} }));
+    this.register(new IntMusicScraper({ name: 'intmusic', baseUrl: '', enabled: true, rateLimitMs: 2000, selectors: {} }));
 
     // Load from database
     this.loadFromDatabase().catch(console.error);
@@ -110,6 +112,10 @@ class ScraperRegistryImpl implements ScraperRegistry {
         return new TorrentSitesScraper(config);
       case 'music-sites':
         return new MusicSitesScraper(config);
+      case 'freemusicarchive':
+        return new FreeMusicArchiveScraper(config);
+      case 'intmusic':
+        return new IntMusicScraper(config);
       case 'soundcloud':
         return new SoundCloudScraper(config);
       default:

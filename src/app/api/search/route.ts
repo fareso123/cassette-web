@@ -69,40 +69,42 @@ export async function POST(request: NextRequest): Promise<Response> {
       response.results = tracks;
       response.resultCount = tracks.length;
     } else {
-      // YouTube search first, then scrapers as fallback
-      const tracks = await extractSearchYouTube(query, 10);
+      // Run YouTube search and scrapers in parallel
+      const [tracks, scraperResults] = await Promise.all([
+        extractSearchYouTube(query, 10),
+        (async () => {
+          const scrapers = await scraperRegistry.getEnabled();
+          const settled = await Promise.allSettled(
+            scrapers.map(s => s.search(query))
+          );
+          return settled
+            .filter((r): r is PromiseFulfilledResult<ScrapedResult[]> =>
+              r.status === 'fulfilled'
+            )
+            .flatMap(r => r.value);
+        })()
+      ]);
 
-      if (tracks.length > 0) {
-        response.source = 'youtubei';
-        response.results = tracks;
-        response.resultCount = tracks.length;
-      } else {
-        // Fallback to scrapers
-        const scrapers = await scraperRegistry.getEnabled();
-        const settled = await Promise.allSettled(
-          scrapers.map(s => s.search(query))
-        );
+      const seen = new Set<string>();
+      const allResults: (ExtractedTrack | ScrapedResult)[] = [...tracks];
 
-        const allResults = settled
-          .filter((r): r is PromiseFulfilledResult<ScrapedResult[]> =>
-            r.status === 'fulfilled'
-          )
-          .flatMap(r => r.value);
+      // Add scraper results that don't duplicate YouTube results
+      for (const result of scraperResults) {
+        if (!seen.has(result.downloadUrl)) {
+          seen.add(result.downloadUrl);
+          allResults.push(result);
+        }
+      }
 
-        const seen = new Set<string>();
-        const deduped = allResults.filter(r => {
-          if (seen.has(r.downloadUrl)) return false;
-          seen.add(r.downloadUrl);
-          return true;
-        });
+      response.source = tracks.length > 0 ? 'youtubei' : 'scrapers';
+      response.results = allResults;
+      response.resultCount = allResults.length;
 
-        response.results = deduped;
-        response.resultCount = deduped.length;
-
-        // Fetch download resources for each result
-        const downloadResources: Record<string, any[]> = {};
-        for (let i = 0; i < deduped.length; i++) {
-          const track = deduped[i];
+      // Fetch download resources for each result
+      const downloadResources: Record<string, any[]> = {};
+      for (let i = 0; i < allResults.length; i++) {
+        const track = allResults[i];
+        if ('scraperName' in track) {
           const scraper = scraperRegistry.getByName(track.scraperName);
           if (scraper && hasDownloadProvider(scraper)) {
             try {
@@ -115,9 +117,9 @@ export async function POST(request: NextRequest): Promise<Response> {
             }
           }
         }
-        if (Object.keys(downloadResources).length > 0) {
-          response.downloadResources = downloadResources;
-        }
+      }
+      if (Object.keys(downloadResources).length > 0) {
+        response.downloadResources = downloadResources;
       }
     }
 
