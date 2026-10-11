@@ -37,30 +37,30 @@
 
 ## 6. Settings Panel UI
 
-- [ ] 6.1 Create `src/components/SettingsPanel.tsx` with tabs: Credentials, Quality, About
-- [ ] 6.2 Credentials tab: Card per source (Qobuz, Tidal, Amazon, YTMusic) with status badge, textarea for credentials, Save/Remove buttons, help text with DevTools instructions
-- [ ] 6.3 Quality tab: Global quality select + per-source override selects (populated from quality constants)
-- [ ] 6.4 About tab: DMCA notice, version, GitHub link
-- [ ] 6.5 Add Settings button to `Navbar.tsx` opening SettingsPanel in a dialog/sheet
+- [x] 6.1 Create `src/components/SettingsPanel.tsx` with tabs: Credentials, Quality, About
+- [x] 6.2 Credentials tab: Card per source (Qobuz, Tidal, Amazon, YTMusic) with status badge, textarea for credentials, Save/Remove buttons, help text with DevTools instructions
+- [x] 6.3 Quality tab: Global quality select + per-source override selects (populated from quality constants)
+- [x] 6.4 About tab: DMCA notice, version, GitHub link
+- [x] 6.5 Add Settings button to `Navbar.tsx` opening SettingsPanel in a dialog/sheet
 
 ## 7. Download Resources UI in Results
 
-- [ ] 7.1 Update `src/components/ResultsTabs.tsx` to add "Download" tab alongside existing tabs
-- [ ] 7.2 Create `DownloadResourcesTab.tsx` component showing expandable list per result
-- [ ] 7.3 Each source entry: quality badge (kind-colored), auth status (lock/connected), effective quality label, download button
-- [ ] 7.4 Download button: reads credentials from localStorage, calls `/api/download/{source}`, handles loading/error states, shows toast on completion
-- [ ] 7.5 Pass download resources from search results to ResultsTabs via props
+- [x] 7.1 Update `src/components/ResultsTabs.tsx` to add "Download" tab alongside existing tabs
+- [x] 7.2 Create `DownloadResourcesTab.tsx` component showing expandable list per result
+- [x] 7.3 Each source entry: quality badge (kind-colored), auth status (lock/connected), effective quality label, download button
+- [x] 7.4 Download button: reads credentials from localStorage, calls `/api/download/{source}`, handles loading/error states, shows toast on completion
+- [x] 7.5 Pass download resources from search results to ResultsTabs via props
 
 ## 8. Footer DMCA Notice
 
-- [ ] 8.1 Update `src/app/globals.css` to add DMCA notice text in footer
-- [ ] 8.2 Update `src/components/Footer.tsx` to render the notice
+- [x] 8.1 Update `src/app/globals.css` to add DMCA notice text in footer
+- [x] 8.2 Update `src/components/Footer.tsx` to render the notice
 
 ## 9. Testing & Polish
 
-- [ ] 9.1 Add unit tests for `credentials.ts` and `quality.ts` helpers
+- [x] 9.1 Add unit tests for `credentials.ts` and `quality.ts` helpers
 - [ ] 9.2 Add integration test for download API route (mock provider)
 - [ ] 9.3 Test full flow: search → expand download → enter credentials → download
-- [ ] 9.4 Verify localStorage persistence across page reloads
-- [ ] 9.5 Run `npm run build` and `npm test` — all pass
+- [x] 9.4 Verify localStorage persistence across page reloads
+- [x] 9.5 Run `npm run build` and `npm test` — all pass
 - [ ] 9.6 Manual QA: each source downloads correctly at selected quality

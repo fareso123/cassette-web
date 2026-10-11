@@ -116,10 +116,6 @@ export function SettingsPanel() {
     setGlobalQualityState(quality);
     setGlobalQuality(quality);
   };
-    setGlobalQualityState(quality);
-    setGlobalQuality(quality);
-  };
-
   const handleSourceQualityChange = (source: SupportedSource, quality: string) => {
     setSourceQualitiesState(prev => ({ ...prev, [source]: quality }));
     if (quality) {
