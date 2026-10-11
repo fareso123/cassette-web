@@ -7,7 +7,7 @@ export interface SearchRequest {
 }
 
 export interface SearchResponse {
-  source: 'yt-dlp' | 'scrapers';
+  source: 'yt-dlp' | 'youtubei' | 'scrapers';
   results: ExtractedTrack[] | ScrapedResult[];
   query: string;
   queryType: 'song' | 'url';

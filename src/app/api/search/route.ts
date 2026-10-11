@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkRateLimit } from '../../../lib/rate-limit';
-import { parseYouTubeUrl } from '@/lib/youtube';
-import { extract, extractSearch } from '../../../lib/extractors/yt-dlp';
+import { extractSearchYouTube, extractYouTubeUrl } from '@/lib/extractors/youtubei-client';
 import { scraperRegistry } from '../../../lib/scrapers/registry';
 import { validateSession } from '../../../lib/session';
 import { recordSearch } from '../../../lib/search-history';
@@ -22,8 +21,6 @@ export async function POST(request: NextRequest): Promise<Response> {
   const ip =
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
 
-  // Optional session: an absent or invalid token simply means anonymous.
-  // This endpoint is intentionally not gated on auth; see AGENTS.md.
   const { valid, session } = await validateSession(request, ip);
 
   const rateLimitResult = valid
@@ -32,10 +29,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   if (!rateLimitResult.success) {
     return NextResponse.json(
-      {
-        error: 'Rate limit exceeded',
-        retryAfter: rateLimitResult.reset,
-      },
+      { error: 'Rate limit exceeded', retryAfter: rateLimitResult.reset },
       { status: 429 }
     );
   }
@@ -62,44 +56,34 @@ export async function POST(request: NextRequest): Promise<Response> {
     };
 
     if (type === 'url') {
-      const urlInfo = parseYouTubeUrl(query);
-      if (!urlInfo.videoId && !urlInfo.playlistId) {
+      const tracks = await extractYouTubeUrl(query);
+      if (tracks.length === 0) {
         return NextResponse.json(
-          { error: 'Invalid YouTube URL' },
+          { error: 'Could not extract audio from URL' },
           { status: 400 }
         );
       }
-
-      const tracks = await extract(query);
-      response.source = 'yt-dlp';
+      response.source = 'youtubei';
       response.results = tracks;
       response.resultCount = tracks.length;
     } else {
-      // Song queries are resolved through yt-dlp's ytsearch extractor, which
-      // returns real YouTube audio tracks. The database-driven scrapers are a
-      // fallback: their CSS selectors are unverified and they carry no direct
-      // audio URL, so they only contribute when ytsearch comes up empty.
-      let tracks: ExtractedTrack[] = [];
-      try {
-        tracks = await extractSearch(query, 5);
-      } catch (err) {
-        console.error('yt-dlp ytsearch failed, falling back to scrapers:', err);
-      }
+      // YouTube search first, then scrapers as fallback
+      const tracks = await extractSearchYouTube(query, 10);
 
       if (tracks.length > 0) {
-        response.source = 'yt-dlp';
+        response.source = 'youtubei';
         response.results = tracks;
         response.resultCount = tracks.length;
       } else {
+        // Fallback to scrapers
         const scrapers = await scraperRegistry.getEnabled();
         const settled = await Promise.allSettled(
           scrapers.map(s => s.search(query))
         );
 
         const allResults = settled
-          .filter(
-            (r): r is PromiseFulfilledResult<ScrapedResult[]> =>
-              r.status === 'fulfilled'
+          .filter((r): r is PromiseFulfilledResult<ScrapedResult[]> =>
+            r.status === 'fulfilled'
           )
           .flatMap(r => r.value);
 
@@ -115,8 +99,6 @@ export async function POST(request: NextRequest): Promise<Response> {
       }
     }
 
-    // Only a signed-in user's history is persisted. Anonymous searches stay
-    // out of the table so it cannot fill up with unassociated rows.
     if (valid && session) {
       await recordSearch(session.userId, query, type, response.resultCount);
     }
