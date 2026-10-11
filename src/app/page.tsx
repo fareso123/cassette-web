@@ -216,9 +216,9 @@ function HomePage() {
         {/* Main content panel - takes remaining space */}
         <Panel
           id="main-content"
-          defaultSize={70}
-          minSize={30}
-          maxSize={100}
+          defaultSize="70%"
+          minSize="30%"
+          maxSize="100%"
         >
           {mainContent}
         </Panel>
@@ -235,7 +235,7 @@ function HomePage() {
         {/* Track Details Panel - resizable side panel */}
         <Panel
           id="details-panel"
-          defaultSize={30}
+          defaultSize="30%"
           minSize={PANEL_MIN_WIDTH}
           maxSize={PANEL_MAX_WIDTH}
           collapsible
