@@ -226,8 +226,8 @@ function HomePage() {
         {/* Resize handle */}
         <Separator
           className={cn(
-            "relative z-50 w-px bg-border hover:bg-primary/50 transition-colors",
-            "after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:size-6 after:rounded-full after:bg-background after:shadow-lg after:transition-all hover:after:scale-110"
+            "relative z-50 w-px bg-muted-foreground/30 hover:bg-primary transition-colors",
+            "after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:size-6 after:rounded-full after:bg-primary after:shadow-lg after:transition-all hover:after:scale-110"
           )}
           aria-label="Resize details panel"
         />
