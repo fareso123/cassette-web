@@ -20,6 +20,7 @@ import { Save, Trash2, Key, Music, Settings, CheckCircle, XCircle, Loader2 } fro
 import { getCredentials, setCredentials, removeCredentials, hasCredentials, CREDENTIAL_HELP_TEXT, SUPPORTED_SOURCES, type SupportedSource } from '@/lib/credentials';
 import { scraperRegistry } from '@/lib/scrapers/registry';
 import { cn } from '@/lib/utils';
+import { getGlobalQuality, setGlobalQuality, getSourceQuality, setSourceQuality, removeSourceQuality, getEffectiveQuality, getAvailableQualities, QUALITY_OPTIONS, getQualityLabel, getKindColor, type GlobalQualityId } from '@/lib/quality';
 const SOURCE_LABELS: Record<string, string> = {
   qobuz: 'Qobuz',
   tidal: 'Tidal',
@@ -116,8 +117,9 @@ export function SettingsPanel() {
     setGlobalQualityState(quality);
     setGlobalQuality(quality);
   };
-  const handleSourceQualityChange = (source: SupportedSource, quality: string) => {
-    setSourceQualitiesState(prev => ({ ...prev, [source]: quality }));
+  const handleSourceQualityChange = (source: SupportedSource, quality: string | null) => {
+    const q = quality || '';
+    setSourceQualitiesState(prev => ({ ...prev, [source]: q }));
     if (quality) {
       setSourceQuality(source, quality);
     } else {
